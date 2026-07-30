@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bacteriocin Lab — Word Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#241A46;
+  --ink-60:rgba(36,26,70,.6);
+  --ink-30:rgba(36,26,70,.28);
+  --ink-12:rgba(36,26,70,.12);
+  --violet:#6B3FA0;
+  --safranin:#E0517A;
+  --agar:#EAD8A6;
+  --agar-deep:#D9BF7E;
+  --glass:#DCE7EA;
+  --card:#FFFFFF;
+  --fluoro:#1FB374;
+  --fluoro-soft:#DCF5EA;
+  --pink-soft:#FCE4EC;
+  --shadow:rgba(36,26,70,.16);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{
+  font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  background:
+    radial-gradient(circle at 12% 6%, #fff 0%, transparent 42%),
+    radial-gradient(circle at 88% 94%, #fff 0%, transparent 38%),
+    var(--glass);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--violet);outline-offset:3px}
+
+/* ================= shell ================= */
+.wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px}
+
+/* ================= top bar ================= */
+.topbar{
+  display:flex;align-items:center;gap:14px;
+  padding:10px 0 18px;
+}
+.brand{font-family:Archivo,sans-serif;font-weight:900;font-size:19px;letter-spacing:-.02em;text-transform:uppercase;margin:0}
+.brand em{font-style:normal;color:var(--safranin)}
+.stats{margin-left:auto;display:flex;gap:8px;align-items:center}
+.pill{
+  display:flex;align-items:center;gap:6px;background:#fff;border-radius:999px;
+  padding:6px 13px;font-weight:600;font-size:14px;box-shadow:0 2px 6px var(--shadow);
+}
+.pill.hearts{color:var(--safranin)}
+.pill.xp{color:var(--violet)}
+
+/* ================= home / streak plate ================= */
+.plate-wrap{position:relative;margin:4px auto 8px;width:min(92vw,560px);aspect-ratio:1/1.02}
+.plate{
+  position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 42% 34%, var(--agar) 0%, var(--agar-deep) 100%);
+  box-shadow:0 22px 50px -18px var(--shadow),
+             inset 0 0 0 12px rgba(255,255,255,.32),
+             inset 0 0 0 13px var(--ink-12);
+}
+.plate svg{position:absolute;inset:0;width:100%;height:100%}
+.streak{fill:none;stroke:rgba(36,26,70,.16);stroke-width:2.4;stroke-linecap:round;stroke-dasharray:1.5 5}
+
+.node{
+  position:absolute;transform:translate(-50%,-50%);
+  width:74px;height:74px;border-radius:50%;border:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  background:#fff;box-shadow:0 5px 0 var(--ink-12),0 10px 20px -8px var(--shadow);
+  transition:transform .16s, box-shadow .16s;
+  padding:0;
+}
+.node:hover:not(:disabled){transform:translate(-50%,-52%);box-shadow:0 7px 0 var(--ink-12),0 14px 26px -8px var(--shadow)}
+.node:active:not(:disabled){transform:translate(-50%,-48%);box-shadow:0 2px 0 var(--ink-12)}
+.node .n{font-family:Archivo,sans-serif;font-weight:900;font-size:22px;line-height:1}
+.node .c{font-size:9px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;opacity:.5}
+.node.done{background:var(--fluoro);color:#fff}
+.node.done .c{opacity:.85}
+.node.locked{background:#EDF2F3;color:var(--ink-30);cursor:not-allowed;box-shadow:0 4px 0 rgba(36,26,70,.07)}
+.node.challenge{background:var(--violet);color:#fff}
+.node.challenge.locked{background:#EDF2F3;color:var(--ink-30)}
+.node.done.challenge{background:var(--safranin)}
+
+.unit-label{
+  text-align:center;margin:14px auto 0;max-width:420px;
+}
+.unit-label h2{font-family:Archivo,sans-serif;font-weight:900;font-size:20px;margin:0 0 4px;letter-spacing:-.02em}
+.unit-label p{margin:0;font-size:13px;color:var(--ink-60);line-height:1.5}
+
+.home-foot{display:flex;gap:10px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+
+/* ================= buttons ================= */
+.btn{
+  font-family:Archivo,sans-serif;font-weight:700;font-size:15px;letter-spacing:.01em;
+  border:0;border-radius:14px;padding:14px 26px;
+  background:var(--ink);color:#fff;box-shadow:0 4px 0 rgba(36,26,70,.45);
+  transition:transform .12s,box-shadow .12s;
+}
+.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 0 rgba(36,26,70,.45)}
+.btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 rgba(36,26,70,.45)}
+.btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.btn.go{background:var(--fluoro);box-shadow:0 4px 0 #148554}
+.btn.go:active:not(:disabled){box-shadow:0 1px 0 #148554}
+.btn.warn{background:var(--safranin);box-shadow:0 4px 0 #B2325C}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink-30);font-weight:600}
+.btn.ghost:active{transform:translateY(1px);box-shadow:inset 0 0 0 2px var(--ink-30)}
+.btn.sm{padding:9px 16px;font-size:13px;border-radius:11px;box-shadow:0 3px 0 rgba(36,26,70,.35)}
+
+/* ================= lesson ================= */
+.lessonbar{display:flex;align-items:center;gap:12px;padding:6px 0 20px}
+.quit{border:0;background:transparent;font-size:24px;line-height:1;color:var(--ink-30);padding:0 4px}
+.track{flex:1;height:14px;background:#fff;border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 3px var(--shadow)}
+.track i{display:block;height:100%;background:var(--fluoro);border-radius:999px;transition:width .35s cubic-bezier(.2,.7,.3,1)}
+
+.q{background:var(--card);border-radius:22px;padding:26px 22px;box-shadow:0 8px 24px -12px var(--shadow)}
+.qtype{font-family:Archivo,sans-serif;font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-30);margin:0 0 12px}
+.qtext{font-family:Archivo,sans-serif;font-weight:700;font-size:clamp(18px,3.4vw,23px);line-height:1.32;margin:0 0 6px;letter-spacing:-.01em}
+.qsub{font-size:14px;color:var(--ink-60);margin:0 0 4px;line-height:1.55}
+.qterm{font-family:Archivo,sans-serif;font-weight:900;font-size:clamp(26px,6vw,40px);letter-spacing:-.025em;margin:6px 0 2px;color:var(--violet);line-height:1.1}
+.qsay{font-size:14px;font-style:italic;color:var(--ink-60);margin:0 0 10px}
+
+.speak{
+  border:0;background:var(--violet);color:#fff;width:52px;height:52px;border-radius:16px;
+  font-size:22px;box-shadow:0 4px 0 #4E2C77;margin:10px 0 4px;
+}
+.speak:active{transform:translateY(3px);box-shadow:0 1px 0 #4E2C77}
+.speak.big{width:100%;height:auto;padding:16px;font-family:Archivo,sans-serif;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;gap:10px}
+
+.opts{display:grid;gap:10px;margin-top:18px}
+.opt{
+  text-align:left;border:0;background:#F6F8F9;border-radius:14px;padding:15px 17px;
+  font-size:15px;line-height:1.45;color:var(--ink);
+  box-shadow:inset 0 0 0 2px var(--ink-12);transition:.12s;
+}
+.opt:hover:not(:disabled){box-shadow:inset 0 0 0 2px var(--ink-30)}
+.opt.sel{box-shadow:inset 0 0 0 3px var(--violet);background:#F3EEFA}
+.opt.right{box-shadow:inset 0 0 0 3px var(--fluoro);background:var(--fluoro-soft)}
+.opt.wrong{box-shadow:inset 0 0 0 3px var(--safranin);background:var(--pink-soft)}
+.opt:disabled{cursor:default}
+.opt b{font-family:Archivo,sans-serif;font-weight:900;letter-spacing:-.01em}
+
+input.typed{
+  width:100%;margin-top:16px;padding:15px 17px;font-family:"IBM Plex Sans",sans-serif;font-size:17px;
+  border:0;border-radius:14px;background:#F6F8F9;box-shadow:inset 0 0 0 2px var(--ink-12);color:var(--ink);
+}
+input.typed:focus{outline:none;box-shadow:inset 0 0 0 3px var(--violet)}
+
+/* feedback bar */
+.fb{
+  position:sticky;bottom:0;margin:18px -16px -60px;padding:18px 16px 26px;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.fb.ok{background:var(--fluoro-soft)}
+.fb.no{background:var(--pink-soft)}
+.fb .msg{font-family:Archivo,sans-serif;font-weight:900;font-size:17px}
+.fb.ok .msg{color:#12805A}
+.fb.no .msg{color:#B2325C}
+.fb .why{font-size:13px;width:100%;color:var(--ink-60);margin-top:-6px;line-height:1.5}
+.fb .btn{margin-left:auto}
+
+/* ================= results ================= */
+.result{text-align:center;padding:30px 10px}
+.result .big{font-family:Archivo,sans-serif;font-weight:900;font-size:clamp(28px,7vw,44px);letter-spacing:-.03em;margin:14px 0 6px}
+.result p{color:var(--ink-60);margin:0 0 22px}
+.tally{display:flex;gap:12px;justify-content:center;margin:22px 0 26px;flex-wrap:wrap}
+.tally div{background:#fff;border-radius:16px;padding:14px 20px;min-width:96px;box-shadow:0 6px 18px -10px var(--shadow)}
+.tally b{display:block;font-family:Archivo,sans-serif;font-weight:900;font-size:26px;line-height:1.1}
+.tally span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-30)}
+
+/* ================= challenge activities ================= */
+.tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.tabs button{
+  border:0;background:#fff;border-radius:11px;padding:10px 15px;font-size:13px;font-weight:600;
+  color:var(--ink);box-shadow:0 3px 0 var(--ink-12);
+}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:#fff;box-shadow:0 3px 0 rgba(36,26,70,.4)}
+
+.pairs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pairs .col{display:grid;gap:8px;align-content:start}
+.pairs button{
+  border:0;background:#fff;border-radius:12px;padding:12px 13px;text-align:left;font-size:13.5px;line-height:1.4;
+  box-shadow:inset 0 0 0 2px var(--ink-12);color:var(--ink);
+}
+.pairs button.sel{box-shadow:inset 0 0 0 3px var(--violet);background:#F3EEFA}
+.pairs button.matched{background:var(--fluoro-soft);box-shadow:inset 0 0 0 2px var(--fluoro);opacity:.55;cursor:default}
+.pairs .term{font-family:Archivo,sans-serif;font-weight:700}
+
+.cloze{background:#fff;border-radius:18px;padding:20px;box-shadow:0 8px 24px -14px var(--shadow)}
+.cloze ol{margin:0;padding-left:22px}
+.cloze li{margin-bottom:16px;line-height:2.1;font-size:15px}
+.cloze select{
+  font-family:"IBM Plex Sans",sans-serif;font-size:14px;padding:6px 8px;border-radius:9px;
+  border:0;box-shadow:inset 0 0 0 2px var(--ink-30);background:#F6F8F9;color:var(--ink);max-width:100%;
+}
+.cloze select.right{box-shadow:inset 0 0 0 3px var(--fluoro);background:var(--fluoro-soft)}
+.cloze select.wrong{box-shadow:inset 0 0 0 3px var(--safranin);background:var(--pink-soft)}
+
+.wsgrid{
+  display:grid;grid-template-columns:repeat(15,1fr);gap:2px;background:#fff;padding:10px;border-radius:16px;
+  box-shadow:0 8px 24px -14px var(--shadow);user-select:none;
+}
+.wsgrid button{
+  aspect-ratio:1;border:0;background:transparent;border-radius:5px;
+  font-family:Archivo,sans-serif;font-weight:700;font-size:clamp(9px,1.9vw,14px);color:var(--ink);padding:0;
+}
+.wsgrid button.pick{background:var(--violet);color:#fff}
+.wsgrid button.found{background:var(--fluoro-soft);color:#12805A}
+.wslist{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 4px}
+.wslist span{
+  font-size:11.5px;font-weight:600;letter-spacing:.05em;background:#fff;border-radius:8px;padding:6px 10px;
+  box-shadow:inset 0 0 0 2px var(--ink-12);
+}
+.wslist span.got{background:var(--fluoro-soft);box-shadow:inset 0 0 0 2px var(--fluoro);text-decoration:line-through;opacity:.6}
+
+.cards{display:grid;gap:12px}
+.vcard{background:#fff;border-radius:18px;padding:18px 20px;box-shadow:0 6px 20px -14px var(--shadow)}
+.vcard h3{font-family:Archivo,sans-serif;font-weight:900;font-size:19px;margin:0;letter-spacing:-.02em}
+.vcard .tr{font-size:13px;color:var(--safranin);font-weight:600;margin:2px 0 8px}
+.vcard .say{font-size:13px;font-style:italic;color:var(--ink-60);margin:0 0 10px}
+.vcard p{margin:0 0 10px;font-size:14.5px;line-height:1.6}
+.vcard .ex{font-size:13.5px;line-height:1.6;color:var(--ink-60);font-style:italic;padding-left:14px;border-left:2px solid var(--agar-deep);margin-bottom:6px}
+.vcard .row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.vcard .mini{border:0;background:var(--violet);color:#fff;width:34px;height:34px;border-radius:10px;font-size:15px;flex:none}
+
+.note{font-size:12.5px;color:var(--ink-60);line-height:1.6;text-align:center;margin:26px auto 0;max-width:520px}
+
+@media (max-width:520px){
+  .pairs{grid-template-columns:1fr}
+  .node{width:62px;height:62px}
+  .node .n{font-size:18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <h1 class="brand">Word <em>Lab</em></h1>
+    <div class="stats">
+      <div class="pill hearts" id="pHearts">♥ 5</div>
+      <div class="pill xp" id="pXp">0 XP</div>
+    </div>
+  </div>
+  <main id="view"></main>
+</div>
+<script>
+/* ============================================================
+   WORD LAB — Bacteriocin Project
+   Edit TERMS below to change the content. Everything else adapts.
+   ============================================================ */
+
+const TERMS = [
+  // ---- Unit 1: our cheese and its bacteria ----
+  {u:0, term:"bacteriocin", tr:"bakteriyosin", say:"bak-TİR-i-o-sin",
+   def:"A small natural protein that bacteria make to fight other bacteria — a tiny natural weapon.",
+   ex:["Our bacteriocins killed almost all of the cancer cells within 48 hours.",
+       "Bacteria can never become resistant to a bacteriocin."]},
+  {u:0, term:"lactic acid bacteria", tr:"laktik asit bakterileri", say:"LAK-tik A-sid bak-Tİ-ri-a",
+   def:"The good bacteria that turn milk sugar into lactic acid. They make cheese and yoghurt tangy.",
+   ex:["We isolated two types of lactic acid bacteria from our cheese.",
+       "Lactic acid bacteria are Gram-positive and do not cause disease."]},
+  {u:0, term:"Lactobacillus", tr:"Lactobacillus (cins adı)", say:"lak-to-ba-Sİ-lıs",
+   def:"A genus of lactic acid bacteria shaped like tiny rods. Our Bacteriocin 1 came from one of these.",
+   ex:["Under the microscope, our Lactobacillus looked like small purple rods.",
+       "Lactobacillus sp. produced Bacteriocin 1 in our experiment."]},
+  {u:0, term:"Lactococcus", tr:"Lactococcus (cins adı)", say:"lak-to-KOK-ıs",
+   def:"Another genus of lactic acid bacteria, but shaped like tiny round balls instead of rods.",
+   ex:["Lactococcus sp. looked like small purple circles under the microscope.",
+       "We obtained Bacteriocin 2 from our Lactococcus sample."]},
+  {u:0, term:"geographical indication", tr:"coğrafi işaret", say:"ci-o-GRA-fi-kıl in-di-KEY-şın",
+   def:"An official label proving a food is unique to one region and made the traditional way.",
+   ex:["Our cheese has a geographical indication certificate from Turkey.",
+       "A geographical indication shows that quality comes from the place of origin."]},
+
+  // ---- Unit 2: identifying the bacteria ----
+  {u:1, term:"Gram staining", tr:"gram boyama", say:"gram STEY-ning",
+   def:"A colour test that shows what kind of cell wall a bacterium has. Purple means Gram-positive.",
+   ex:["Gram staining showed that our bacteria were Gram-positive.",
+       "After Gram staining we saw purple rods and purple circles."]},
+  {u:1, term:"catalase test", tr:"katalaz testi", say:"KA-tı-leyz test",
+   def:"Add a drop of hydrogen peroxide: if bubbles appear, the bacteria are catalase-positive.",
+   ex:["Our bacteria did not bubble, so they were catalase-negative.",
+       "The catalase test helped us confirm they were lactic acid bacteria."]},
+  {u:1, term:"oxidase test", tr:"oksidaz testi", say:"OK-si-deyz test",
+   def:"A strip that turns blue or purple if a certain enzyme is there. Lactic acid bacteria stay unchanged.",
+   ex:["The oxidase strip did not change colour, so our bacteria were oxidase-negative.",
+       "Both the catalase and oxidase tests confirmed our result."]},
+
+  // ---- Unit 3: producing and purifying ----
+  {u:2, term:"growth medium", tr:"besiyeri", say:"grouth Mİ-di-ım",
+   def:"The special liquid or jelly food that lets bacteria grow in the lab.",
+   ex:["We grew our bacteria in a liquid growth medium for 48 hours.",
+       "MRS and M17 are growth media made for lactic acid bacteria."]},
+  {u:2, term:"ultrafiltration", tr:"ultrafiltrasyon", say:"al-tra-fil-TREY-şın",
+   def:"Cleaning a substance with an extremely fine filter so only what you want is left.",
+   ex:["Ultrafiltration made our bacteriocin more concentrated and pure.",
+       "Purification is an important step before testing a substance."]},
+  {u:2, term:"disk diffusion test", tr:"disk difüzyon testi", say:"disk di-FYU-jın test",
+   def:"A paper disk is put on growing bacteria. A clear ring means the substance stopped them.",
+   ex:["Our disk diffusion test showed clear zones, proving the bacteriocins were antimicrobial.",
+       "We compared our bacteriocins to nisin using the disk diffusion test."]},
+
+  // ---- Unit 4: testing on cancer cells ----
+  {u:3, term:"cytotoxicity", tr:"sitotoksisite", say:"say-to-tok-Sİ-si-ti",
+   def:"How harmful a substance is to living cells — in other words, how well it kills them.",
+   ex:["We tested the cytotoxicity of our bacteriocins on lung and breast cancer cells.",
+       "High cytotoxicity toward cancer cells is exactly what a good cancer drug needs."]},
+  {u:3, term:"MTT assay", tr:"MTT testi", say:"em-ti-Tİ A-sey",
+   def:"A test that shows how many cells are still alive. More purple colour means more living cells.",
+   ex:["The MTT test showed very little purple colour — most cells had died.",
+       "We ran the MTT assay after both 24 and 48 hours."]},
+  {u:3, term:"negative control", tr:"negatif kontrol", say:"NE-gı-tiv kın-TROL",
+   def:"The group that gets no treatment at all. It shows what normal and untouched looks like.",
+   ex:["In the negative control, the cancer cells stayed alive and kept growing.",
+       "We always compare our results against the negative control."]},
+  {u:3, term:"positive control", tr:"pozitif kontrol", say:"PO-zi-tiv kın-TROL",
+   def:"The group that gets something already known to work. It shows what success looks like.",
+   ex:["We used nisin as our positive control.",
+       "Our bacteriocins worked better than the positive control."]},
+  {u:3, term:"nisin", tr:"nisin", say:"NAY-sin",
+   def:"A bacteriocin you can already buy. We used it as the benchmark for our own.",
+   ex:["Our bacteriocins were about twice as effective as nisin.",
+       "Nisin is a well-known bacteriocin used to preserve food."]},
+
+  // ---- Unit 5: proving cell death ----
+  {u:4, term:"immunofluorescence", tr:"immünofloresan", say:"i-myu-no-flu-ı-RE-sıns",
+   def:"A technique using glowing markers to light up one specific protein inside a cell.",
+   ex:["Immunofluorescence let us see the PCNA and Caspase-3 proteins glowing.",
+       "We used a fluorescence microscope to take photos after labelling."]},
+  {u:4, term:"PCNA", tr:"PCNA (çoğalan hücre çekirdek antijeni)", say:"pi-si-en-EY",
+   def:"A protein that shows whether a cell is still growing. In the nucleus: healthy. In the cytoplasm: dying.",
+   ex:["In our negative control, PCNA glowed brightly in the nucleus.",
+       "In our bacteriocin groups, PCNA had moved into the cytoplasm."]},
+  {u:4, term:"Caspase-3", tr:"Kaspaz-3", say:"KAS-peyz thri",
+   def:"A protein that only switches on when a cell is dying in a controlled way.",
+   ex:["We saw strong Caspase-3 fluorescence in the treated cells.",
+       "No Caspase-3 signal appeared in the healthy control cells."]},
+  {u:4, term:"apoptosis", tr:"apoptoz", say:"a-pop-TO-sis",
+   def:"Programmed cell death — a safe, organised shut-down instead of a messy explosion.",
+   ex:["Caspase-3 activation showed the cancer cells were going through apoptosis.",
+       "Apoptosis is a controlled process, not a cell simply bursting."]},
+  {u:4, term:"SDS-PAGE", tr:"SDS-PAGE (jel elektroforezi)", say:"es-di-es-peyc",
+   def:"A technique that separates proteins by size using electricity, to find their molecular weight.",
+   ex:["SDS-PAGE showed that our bacteriocins were about 11 kilodaltons.",
+       "We ran SDS-PAGE after the regional jury recommended it."]}
+];
+
+const UNITS = [
+  {n:"Our cheese and its bacteria", d:"Where everything started: the cave-ripened cheese and the two bacteria inside it."},
+  {n:"Identifying the bacteria",    d:"The three lab tests that proved what we had isolated."},
+  {n:"Making the bacteriocin",      d:"Growing, purifying, and proving that the substance really works."},
+  {n:"Testing on cancer cells",     d:"Cell culture, the MTT assay, and the two control groups."},
+  {n:"Proving cell death",          d:"The glowing markers that showed the cancer cells were dying."}
+];
+
+const WS_WORDS = ["BACTERIOCIN","LACTOBACILLUS","LACTOCOCCUS","CYTOTOXICITY","APOPTOSIS",
+                  "NISIN","CATALASE","OXIDASE","ISOLATION","PURIFICATION","HYPOTHESIS"];
+
+const CLOZE = [
+  {s:"We isolated two types of ___ : Lactobacillus sp. and Lactococcus sp.", a:"lactic acid bacteria"},
+  {s:"Our cheese has an official ___ certificate from Turkey.", a:"geographical indication"},
+  {s:"___ turned our bacteria purple, showing they were Gram-positive.", a:"Gram staining"},
+  {s:"In the ___ , bubbles would mean the bacteria were catalase-positive.", a:"catalase test"},
+  {s:"The ___ showed a clear zone, proving our substance was antimicrobial.", a:"disk diffusion test"},
+  {s:"We measured ___ to see how toxic our bacteriocin was to cancer cells.", a:"cytotoxicity"},
+  {s:"___ let us see the PCNA and Caspase-3 proteins glowing under the microscope.", a:"immunofluorescence"},
+  {s:"Caspase-3 showed the cancer cells were going through ___ , a controlled cell death.", a:"apoptosis"}
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const S = { xp:0, hearts:5, done:{}, view:"home", unit:0 };
+
+function save(){ try{ localStorage.setItem("wordlab", JSON.stringify({xp:S.xp, done:S.done})); }catch(e){} }
+function load(){
+  try{
+    const r = JSON.parse(localStorage.getItem("wordlab")||"{}");
+    if(r.xp) S.xp = r.xp;
+    if(r.done) S.done = r.done;
+  }catch(e){}
+}
+
+const $ = s => document.querySelector(s);
+const view = () => $("#view");
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function chrome(){
+  $("#pHearts").textContent = "♥ " + S.hearts;
+  $("#pXp").textContent = S.xp + " XP";
+  $("#pHearts").style.visibility = (S.view === "lesson") ? "visible" : "hidden";
+}
+
+/* ---- speech ---- */
+let voice = null;
+function pickVoice(){
+  const v = speechSynthesis.getVoices();
+  voice = v.find(x=>/en-GB/i.test(x.lang)) || v.find(x=>/^en/i.test(x.lang)) || null;
+}
+if(window.speechSynthesis){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function say(text){
+  if(!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  if(voice) u.voice = voice;
+  u.rate = .82; u.pitch = 1;
+  speechSynthesis.speak(u);
+}
+window.say = say;
+
+/* ============================================================
+   HOME — the streak plate
+   ============================================================ */
+const PATH = [ {x:26,y:16},{x:66,y:31},{x:24,y:47},{x:70,y:62},{x:28,y:78},{x:62,y:90} ];
+
+function renderHome(){
+  S.view = "home"; chrome();
+  const total = UNITS.length;
+  const doneCount = Object.keys(S.done).filter(k=>S.done[k]).length;
+
+  const nodes = PATH.map((p,i)=>{
+    const isCh = i === total;
+    const unlocked = true;   // every unit is open from the start
+    const done = !!S.done[i];
+    const cls = ["node", isCh?"challenge":"", done?"done":"", !unlocked?"locked":""].filter(Boolean).join(" ");
+    const label = isCh ? "LAB" : "UNIT";
+    const inner = isCh ? "★" : (i+1);
+    return `<button class="${cls}" style="left:${p.x}%;top:${p.y}%" data-u="${i}" ${unlocked?"":"disabled"}
+              aria-label="${isCh?"Final challenge":"Unit "+(i+1)+": "+UNITS[i].n}">
+              <span class="n">${done && !isCh ? "✓" : inner}</span><span class="c">${label}</span>
+            </button>`;
+  }).join("");
+
+  const line = `M ${PATH.map(p=>`${p.x} ${p.y}`).join(" L ")}`;
+
+  view().innerHTML = `
+    <div class="plate-wrap">
+      <div class="plate"></div>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <path class="streak" d="${line}"/>
+      </svg>
+      ${nodes}
+    </div>
+    <div class="unit-label">
+      <h2>${doneCount ? doneCount + " / " + total + " units closed" : "Start with Unit 1"}</h2>
+      <p>Twenty words, five units, one final lab challenge. Tap a colony to open it.</p>
+    </div>
+    <div class="home-foot">
+      <button class="btn ghost sm" id="allCards">All 20 cards</button>
+      <button class="btn ghost sm" id="reset">Start over</button>
+    </div>
+    <p class="note">Tip: tap 🔊 anywhere to hear a word. Say it out loud after the voice — that is the part that sticks.</p>`;
+
+  view().querySelectorAll(".node").forEach(b=>{
+    b.onclick = ()=>{ const u = +b.dataset.u; u === total ? renderChallenge() : startLesson(u); };
+  });
+  $("#allCards").onclick = renderCards;
+  $("#reset").onclick = ()=>{ S.xp=0; S.done={}; save(); renderHome(); };
+}
+
+/* ============================================================
+   LESSON ENGINE
+   ============================================================ */
+let Q = [], qi = 0, answered = false, picked = null, lessonUnit = 0, correctCount = 0;
+
+function distractors(pool, right, n, key){
+  return shuffle(pool.filter(t=>t[key] !== right[key])).slice(0,n);
+}
+
+function buildQuestions(unitTerms){
+  const all = TERMS, qs = [];
+  unitTerms.forEach(t=>{
+    // 1. definition -> term
+    qs.push({kind:"pick", type:"What is it?", text:t.def,
+      options:shuffle([t, ...distractors(all,t,3,"term")]).map(o=>({label:o.term, ok:o.term===t.term})),
+      t});
+    // 2. Turkish -> English
+    qs.push({kind:"pick", type:"Türkçesi verildi", text:t.tr, sub:"Which English term is this?",
+      options:shuffle([t, ...distractors(all,t,3,"term")]).map(o=>({label:o.term, ok:o.term===t.term})),
+      t});
+    // 3. listen -> term
+    qs.push({kind:"listen", type:"Listen", t,
+      options:shuffle([t, ...distractors(all,t,2,"term")]).map(o=>({label:o.term, ok:o.term===t.term}))});
+    // 4. cloze from a real project sentence
+    const sent = t.ex[Math.random()<.5?0:1];
+    const re = new RegExp(t.term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"), "i");
+    if(re.test(sent)){
+      qs.push({kind:"pick", type:"Complete the sentence", text:sent.replace(re,"__________"),
+        options:shuffle([t, ...distractors(all,t,3,"term")]).map(o=>({label:o.term, ok:o.term===t.term})),
+        t});
+    }
+    // 5. type it
+    qs.push({kind:"type", type:"Type the term", text:t.def, sub:"Türkçesi: "+t.tr, t});
+    // 6. say it (no penalty)
+    qs.push({kind:"speak", type:"Say it out loud", t});
+  });
+  return shuffle(qs);
+}
+
+function startLesson(u){
+  lessonUnit = u;
+  Q = buildQuestions(TERMS.filter(t=>t.u===u));
+  qi = 0; answered = false; picked = null; correctCount = 0; S.hearts = 5;
+  S.view = "lesson";
+  renderQ();
+}
+
+function renderQ(){
+  chrome();
+  if(qi >= Q.length) return renderResult(true);
+  const q = Q[qi], pct = Math.round(qi / Q.length * 100);
+  let body = "";
+
+  if(q.kind === "pick"){
+    body = `<p class="qtext">${esc(q.text)}</p>
+            ${q.sub?`<p class="qsub">${esc(q.sub)}</p>`:""}
+            <div class="opts">${q.options.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o.label)}</button>`).join("")}</div>`;
+  } else if(q.kind === "listen"){
+    body = `<button class="speak big" id="hear">🔊 Play the word</button>
+            <p class="qsub">Listen, then choose what you heard.</p>
+            <div class="opts">${q.options.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o.label)}</button>`).join("")}</div>`;
+  } else if(q.kind === "type"){
+    body = `<p class="qtext">${esc(q.text)}</p>
+            <p class="qsub">${esc(q.sub)}</p>
+            <input class="typed" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type in English…">
+            <div class="opts"><button class="btn go" id="check" style="margin-top:6px">Check</button></div>`;
+  } else if(q.kind === "speak"){
+    body = `<p class="qterm">${esc(q.t.term)}</p>
+            <p class="qsay">say it: ${esc(q.t.say)}</p>
+            <button class="speak" onclick="say('${q.t.term.replace(/'/g,"\\'")}')" aria-label="Hear it">🔊</button>
+            <p class="qsub" style="margin-top:14px">Now say this sentence out loud, twice:</p>
+            <p class="qtext" style="font-size:17px">${esc(q.t.ex[0])}</p>
+            <div class="opts"><button class="btn go" id="said" style="margin-top:8px">I said it ✓</button></div>`;
+  }
+
+  view().innerHTML = `
+    <div class="lessonbar">
+      <button class="quit" id="quit" aria-label="Leave">×</button>
+      <div class="track"><i style="width:${pct}%"></i></div>
+    </div>
+    <div class="q">
+      <p class="qtype">${esc(q.type)}</p>
+      ${body}
+    </div>
+    <div id="fbslot"></div>`;
+
+  $("#quit").onclick = renderHome;
+
+  if(q.kind === "listen"){ $("#hear").onclick = ()=>say(q.t.term); setTimeout(()=>say(q.t.term), 350); }
+  if(q.kind === "speak"){ $("#said").onclick = ()=>{ correctCount++; S.xp += 2; qi++; renderQ(); }; }
+  if(q.kind === "type"){
+    const check = ()=>{
+      if(answered) return;
+      const v = ($("#ans").value||"").trim().toLowerCase().replace(/\s+/g," ");
+      const g = q.t.term.toLowerCase();
+      judge(v === g || (v.length>3 && g.startsWith(v) && v.length >= g.length-2), q.t.term);
+    };
+    $("#check").onclick = check;
+    $("#ans").addEventListener("keydown", e=>{ if(e.key==="Enter") check(); });
+    setTimeout(()=>$("#ans")&&$("#ans").focus(), 60);
+  }
+  if(q.kind === "pick" || q.kind === "listen"){
+    view().querySelectorAll(".opt").forEach(b=>{
+      b.onclick = ()=>{
+        if(answered) return;
+        const i = +b.dataset.i, ok = q.options[i].ok;
+        view().querySelectorAll(".opt").forEach((x,j)=>{
+          x.disabled = true;
+          if(q.options[j].ok) x.classList.add("right");
+          else if(j===i) x.classList.add("wrong");
+        });
+        judge(ok, q.t.term, true);
+      };
+    });
+  }
+}
+
+function judge(ok, right, skipMark){
+  answered = true;
+  const q = Q[qi];
+  if(ok){ correctCount++; S.xp += 3; say(right); }
+  else { S.hearts--; Q.push(q); }
+  chrome();
+
+  $("#fbslot").innerHTML = `
+    <div class="fb ${ok?"ok":"no"}">
+      <div class="msg">${ok ? "Correct" : "Not quite — " + esc(right)}</div>
+      <button class="btn ${ok?"go":"warn"}" id="next">${S.hearts<=0 && !ok ? "See result" : "Continue"}</button>
+      ${ok ? "" : `<div class="why">${esc(q.t.def)}</div>`}
+    </div>`;
+
+  $("#next").onclick = ()=>{
+    if(S.hearts <= 0) return renderResult(false);
+    answered = false; qi++; renderQ();
+  };
+  $("#next").focus();
+}
+
+function renderResult(won){
+  S.view = "result"; chrome();
+  if(won){
+    S.done[lessonUnit] = true; S.xp += 15; save();
+  }
+  view().innerHTML = `
+    <div class="result">
+      <div style="font-size:56px">${won ? "🧫" : "💔"}</div>
+      <p class="big">${won ? "Colony closed!" : "Out of hearts"}</p>
+      <p>${won ? esc(UNITS[lessonUnit].n) : "No problem — every scientist repeats the experiment."}</p>
+      <div class="tally">
+        <div><b>${correctCount}</b><span>Correct</span></div>
+        <div><b>${S.xp}</b><span>Total XP</span></div>
+        <div><b>${Object.keys(S.done).filter(k=>S.done[k]).length}/${UNITS.length}</b><span>Units</span></div>
+      </div>
+      <button class="btn go" id="again">${won ? "Back to the plate" : "Try this unit again"}</button>
+    </div>`;
+  $("#again").onclick = ()=> won ? renderHome() : startLesson(lessonUnit);
+}
+
+/* ============================================================
+   ALL CARDS (reference view)
+   ============================================================ */
+function renderCards(){
+  S.view="cards"; chrome();
+  const groups = UNITS.map((u,i)=>{
+    const list = TERMS.filter(t=>t.u===i).map(t=>`
+      <div class="vcard">
+        <div class="row">
+          <button class="mini" onclick="say('${t.term.replace(/'/g,"\\'")}')" aria-label="Hear ${esc(t.term)}">🔊</button>
+          <div><h3>${esc(t.term)}</h3><div class="tr">${esc(t.tr)}</div></div>
+        </div>
+        <p class="say">${esc(t.say)}</p>
+        <p>${esc(t.def)}</p>
+        <div class="ex">${esc(t.ex[0])}</div>
+        <div class="ex">${esc(t.ex[1])}</div>
+      </div>`).join("");
+    return `<h2 style="font-family:Archivo;font-weight:900;font-size:17px;margin:26px 0 12px;letter-spacing:-.02em">
+              ${i+1} · ${esc(u.n)}</h2><div class="cards">${list}</div>`;
+  }).join("");
+  view().innerHTML = `<button class="btn ghost sm" id="back">← Back</button>${groups}`;
+  $("#back").onclick = renderHome;
+}
+
+/* ============================================================
+   FINAL CHALLENGE — matching · cloze · word search
+   ============================================================ */
+function renderChallenge(tab){
+  S.view="challenge"; chrome();
+  tab = tab || "match";
+  view().innerHTML = `
+    <button class="btn ghost sm" id="back" style="margin-bottom:16px">← Back</button>
+    <div class="tabs" role="group">
+      <button data-t="match"  aria-pressed="${tab==="match"}">Match the pairs</button>
+      <button data-t="cloze"  aria-pressed="${tab==="cloze"}">Fill the gaps</button>
+      <button data-t="search" aria-pressed="${tab==="search"}">Word search</button>
+    </div>
+    <div id="act"></div>`;
+  $("#back").onclick = renderHome;
+  view().querySelectorAll(".tabs button").forEach(b=> b.onclick = ()=>renderChallenge(b.dataset.t));
+  ({match:actMatch, cloze:actCloze, search:actSearch}[tab])();
+}
+
+/* ---- matching ---- */
+function actMatch(){
+  const pool = shuffle(TERMS).slice(0,10);
+  const left = shuffle(pool), right = shuffle(pool);
+  let sel = null, hits = 0;
+  $("#act").innerHTML = `
+    <p class="qsub" style="margin-bottom:14px">Tap a term, then tap its meaning. Ten pairs.</p>
+    <div class="pairs">
+      <div class="col">${left.map((t,i)=>`<button class="term" data-k="${TERMS.indexOf(t)}">${esc(t.term)}</button>`).join("")}</div>
+      <div class="col">${right.map(t=>`<button data-k="${TERMS.indexOf(t)}">${esc(t.def)}</button>`).join("")}</div>
+    </div>
+    <p class="note" id="mscore">0 / 10 matched</p>`;
+  $("#act").querySelectorAll(".pairs button").forEach(b=>{
+    b.onclick = ()=>{
+      if(b.classList.contains("matched")) return;
+      if(!sel){ sel = b; b.classList.add("sel"); return; }
+      if(sel === b){ sel.classList.remove("sel"); sel = null; return; }
+      if(sel.dataset.k === b.dataset.k){
+        sel.classList.remove("sel"); sel.classList.add("matched"); b.classList.add("matched");
+        hits++; S.xp += 3; chrome(); save();
+        $("#mscore").textContent = hits + " / 10 matched" + (hits===10 ? " — all closed 🧫" : "");
+      } else {
+        b.classList.add("sel");
+        setTimeout(()=>{ b.classList.remove("sel"); sel && sel.classList.remove("sel"); sel=null; }, 420);
+        return;
+      }
+      sel = null;
+    };
+  });
+}
+
+/* ---- cloze ---- */
+function actCloze(){
+  const bank = TERMS.map(t=>t.term);
+  $("#act").innerHTML = `
+    <div class="cloze">
+      <p class="qsub">Choose the right term for each gap, then check.</p>
+      <ol>${CLOZE.map((c,i)=>{
+        const opts = shuffle([c.a, ...shuffle(bank.filter(b=>b!==c.a)).slice(0,4)]);
+        const parts = c.s.split("___");
+        return `<li>${esc(parts[0])}
+          <select data-i="${i}"><option value="">— choose —</option>
+          ${opts.map(o=>`<option>${esc(o)}</option>`).join("")}</select>
+          ${esc(parts[1]||"")}</li>`;
+      }).join("")}</ol>
+      <button class="btn go" id="checkCloze">Check my answers</button>
+      <p class="note" id="cscore"></p>
+    </div>`;
+  $("#checkCloze").onclick = ()=>{
+    let n = 0;
+    $("#act").querySelectorAll("select").forEach(s=>{
+      const ok = s.value === CLOZE[+s.dataset.i].a;
+      s.className = ok ? "right" : "wrong";
+      if(ok) n++;
+    });
+    S.xp += n * 2; chrome(); save();
+    $("#cscore").textContent = n + " / " + CLOZE.length + " correct";
+  };
+}
+
+/* ---- word search ---- */
+function buildGrid(words, size){
+  const g = Array.from({length:size}, ()=>Array(size).fill(""));
+  const dirs = [[0,1],[1,0],[1,1],[-1,1],[0,-1],[-1,0]];
+  const placed = [];
+  words.forEach(w=>{
+    for(let tries=0; tries<400; tries++){
+      const [dr,dc] = dirs[Math.random()*dirs.length|0];
+      const r = Math.random()*size|0, c = Math.random()*size|0;
+      const er = r + dr*(w.length-1), ec = c + dc*(w.length-1);
+      if(er<0||er>=size||ec<0||ec>=size) continue;
+      let ok = true;
+      for(let k=0;k<w.length;k++){
+        const ch = g[r+dr*k][c+dc*k];
+        if(ch && ch !== w[k]){ ok = false; break; }
+      }
+      if(!ok) continue;
+      for(let k=0;k<w.length;k++) g[r+dr*k][c+dc*k] = w[k];
+      placed.push(w); return;
+    }
+  });
+  const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(!g[r][c]) g[r][c] = A[Math.random()*26|0];
+  return {g, placed};
+}
+
+function actSearch(){
+  const size = 15;
+  let built = buildGrid(WS_WORDS, size);
+  for(let k=0; k<40 && built.placed.length < WS_WORDS.length; k++) built = buildGrid(WS_WORDS, size);
+  const g = built.g, placed = built.placed;
+  const found = new Set();
+  let a = null;
+
+  $("#act").innerHTML = `
+    <p class="qsub" style="margin-bottom:12px">Tap the first letter, then the last letter of a word.</p>
+    <div class="wsgrid" id="grid">
+      ${g.map((row,r)=>row.map((ch,c)=>`<button data-r="${r}" data-c="${c}">${ch}</button>`).join("")).join("")}
+    </div>
+    <div class="wslist" id="wl">${placed.map(w=>`<span data-w="${w}">${w}</span>`).join("")}</div>
+    <p class="note" id="wscore">0 / ${placed.length} found</p>`;
+
+  const cell = (r,c)=> $(`#grid button[data-r="${r}"][data-c="${c}"]`);
+
+  $("#grid").querySelectorAll("button").forEach(b=>{
+    b.onclick = ()=>{
+      const r = +b.dataset.r, c = +b.dataset.c;
+      if(!a){ a = {r,c}; b.classList.add("pick"); return; }
+      const dr = Math.sign(r - a.r), dc = Math.sign(c - a.c);
+      const len = Math.max(Math.abs(r-a.r), Math.abs(c-a.c)) + 1;
+      const straight = (r===a.r || c===a.c || Math.abs(r-a.r)===Math.abs(c-a.c));
+      let word = "", cells = [];
+      if(straight){
+        for(let k=0;k<len;k++){
+          const rr = a.r+dr*k, cc = a.c+dc*k;
+          word += g[rr][cc]; cells.push([rr,cc]);
+        }
+      }
+      const hit = placed.find(w => (w === word || w === [...word].reverse().join("")) && !found.has(w));
+      cell(a.r,a.c).classList.remove("pick");
+      if(hit){
+        found.add(hit);
+        cells.forEach(([rr,cc])=>cell(rr,cc).classList.add("found"));
+        $(`#wl span[data-w="${hit}"]`).classList.add("got");
+        S.xp += 4; chrome(); save();
+        $("#wscore").textContent = found.size + " / " + placed.length + " found" +
+          (found.size === placed.length ? " — plate complete 🧫" : "");
+      }
+      a = null;
+    };
+  });
+}
+
+/* ============================================================ */
+load();
+renderHome();
+
+</script>
+</body>
+</html>
