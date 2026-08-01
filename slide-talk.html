@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slide Talk — Bacteriocin Project</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#241A46;--ink-60:rgba(36,26,70,.6);--ink-30:rgba(36,26,70,.3);--ink-12:rgba(36,26,70,.12);
+  --violet:#6B3FA0;--safranin:#E0517A;--agar:#EAD8A6;--glass:#DCE7EA;
+  --fluoro:#1FB374;--fluoro-soft:#DCF5EA;--pink-soft:#FCE4EC;--shadow:rgba(36,26,70,.16);
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:"IBM Plex Sans",system-ui,sans-serif;
+ background:radial-gradient(circle at 12% 6%,#fff 0%,transparent 42%),radial-gradient(circle at 88% 94%,#fff 0%,transparent 38%),var(--glass);
+ color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--violet);outline-offset:3px}
+.wrap{max-width:780px;margin:0 auto;padding:16px 16px 70px}
+
+.topbar{display:flex;align-items:center;gap:12px;padding:6px 0 14px;flex-wrap:wrap}
+.brand{font-family:Archivo;font-weight:900;font-size:18px;letter-spacing:-.02em;text-transform:uppercase;margin:0}
+.brand em{font-style:normal;color:var(--safranin)}
+.names{margin-left:auto;display:flex;gap:6px;align-items:center;font-size:11px;color:var(--ink-60)}
+.names input{width:80px;border:0;border-radius:9px;padding:6px 9px;font-family:inherit;font-size:12px;font-weight:600;background:#fff;box-shadow:0 2px 6px var(--shadow)}
+.names input.a{color:var(--violet)}.names input.b{color:var(--safranin)}
+
+/* nav */
+.nav{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.nav .dots{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+.nav .dots i{height:6px;border-radius:99px;background:var(--ink-12);flex:1;min-width:8px;cursor:pointer}
+.nav .dots i.on{background:var(--violet)}
+.nav .dots i.past{background:var(--fluoro)}
+.nav span{font-size:12px;color:var(--ink-30);font-weight:600;white-space:nowrap}
+.iconbtn{border:0;background:#fff;width:36px;height:36px;border-radius:11px;font-size:16px;box-shadow:0 3px 0 var(--ink-12);color:var(--ink)}
+.iconbtn:disabled{opacity:.3}
+
+.card{background:#fff;border-radius:22px;padding:22px;box-shadow:0 10px 28px -16px var(--shadow)}
+.slidetag{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.slidenum{font-family:Archivo;font-weight:900;font-size:11px;letter-spacing:.14em;background:var(--agar);padding:5px 11px;border-radius:99px}
+.speaker{font-family:Archivo;font-weight:700;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:5px 11px;border-radius:99px}
+.speaker.a{background:#F3EEFA;color:var(--violet)}.speaker.b{background:var(--pink-soft);color:#B2325C}
+h2.stitle{font-family:Archivo;font-weight:900;font-size:clamp(20px,4.2vw,27px);letter-spacing:-.02em;margin:0 0 4px;line-height:1.2}
+p.job{margin:0 0 18px;font-size:14px;color:var(--ink-60);line-height:1.5}
+
+.lab{font-family:Archivo;font-weight:700;font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-30);margin:20px 0 9px}
+.facts{display:grid;gap:8px}
+.fact{display:flex;gap:11px;align-items:flex-start;background:#F6F8F9;border-radius:12px;padding:11px 13px;font-size:14.5px;line-height:1.45;box-shadow:inset 0 0 0 2px var(--ink-12);cursor:pointer;text-align:left;border:0;color:var(--ink);width:100%}
+.fact .tick{width:19px;height:19px;border-radius:6px;flex:none;box-shadow:inset 0 0 0 2px var(--ink-30);margin-top:1px;font-size:12px;display:flex;align-items:center;justify-content:center;color:#fff}
+.fact.on{background:var(--fluoro-soft);box-shadow:inset 0 0 0 2px var(--fluoro)}
+.fact.on .tick{background:var(--fluoro);box-shadow:none}
+
+.words{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.words button{border:0;background:var(--agar);border-radius:9px;padding:7px 12px;font-size:13px;font-weight:600;color:var(--ink)}
+.words button.used{background:var(--violet);color:#fff}
+
+.conns{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.conns button{border:0;background:#fff;border-radius:9px;padding:8px 13px;font-size:13.5px;font-weight:600;color:var(--violet);box-shadow:inset 0 0 0 2px var(--ink-12);text-align:left}
+.conns button small{display:block;font-weight:400;font-size:10.5px;color:var(--ink-30);margin-top:1px}
+.conns button.used{background:#F3EEFA;box-shadow:inset 0 0 0 2px var(--violet)}
+
+.model{margin-top:18px}
+.model summary{cursor:pointer;list-style:none;font-family:Archivo;font-weight:700;font-size:12.5px;color:var(--ink-30);padding:9px 0}
+.model summary::-webkit-details-marker{display:none}
+.model summary::before{content:"▸ ";display:inline-block;transition:.2s}
+.model[open] summary::before{transform:rotate(90deg)}
+.model p{margin:0;background:#F6F8F9;border-radius:12px;padding:14px 15px;font-size:14.5px;line-height:1.6;font-style:italic;color:var(--ink-60)}
+.model .warn{margin-top:8px;font-size:12px;font-style:normal;color:var(--safranin);background:none;padding:0}
+
+.jury{margin-top:18px;background:var(--pink-soft);border-radius:14px;padding:15px 16px}
+.jury b{font-family:Archivo;font-weight:900;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#B2325C;display:block;margin-bottom:6px}
+.jury p{margin:0;font-size:15px;line-height:1.5;font-weight:600}
+.jury .hintline{margin-top:8px;font-size:13px;font-weight:400;color:var(--ink-60);display:none}
+.jury.open .hintline{display:block}
+.jury button{margin-top:10px;border:0;background:#fff;border-radius:9px;padding:7px 13px;font-size:12.5px;font-weight:600;color:#B2325C;box-shadow:0 2px 0 rgba(178,50,92,.25)}
+
+.acts{display:flex;gap:10px;margin-top:20px;align-items:center;flex-wrap:wrap}
+.btn{font-family:Archivo;font-weight:700;font-size:15px;border:0;border-radius:14px;padding:13px 22px;background:var(--ink);color:#fff;box-shadow:0 4px 0 rgba(36,26,70,.45)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(36,26,70,.45)}
+.btn.go{background:var(--fluoro);box-shadow:0 4px 0 #148554}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink-30);font-weight:600;font-size:13px;padding:10px 16px}
+.hear{border:0;background:var(--violet);color:#fff;width:44px;height:44px;border-radius:13px;font-size:18px;box-shadow:0 4px 0 #4E2C77;flex:none}
+
+.hud{display:flex;gap:8px;align-items:center;margin-top:14px;font-size:12px;color:var(--ink-30);flex-wrap:wrap}
+.hud b{color:var(--violet);font-family:Archivo;font-size:14px}
+
+.done{text-align:center;padding:34px 12px}
+.done .big{font-family:Archivo;font-weight:900;font-size:clamp(24px,6vw,36px);margin:12px 0 6px;letter-spacing:-.03em}
+.done p{color:var(--ink-60);margin:0 auto 20px;max-width:440px;line-height:1.6}
+.note{font-size:12.5px;color:var(--ink-60);line-height:1.6;text-align:center;margin:22px auto 0;max-width:540px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <h1 class="brand">Slide <em>Talk</em></h1>
+    <div class="names">
+      <span>A:</span><input class="a" id="nameA" value="Speaker A" maxlength="12">
+      <span>B:</span><input class="b" id="nameB" value="Speaker B" maxlength="12">
+    </div>
+  </div>
+  <main id="view"></main>
+</div>
+
+<script>
+/* ============================================================
+   One entry per slide of the real deck.
+   facts   : the content the student must get across — NOT sentences.
+             They build their own wording from these.
+   words   : project terms that should appear
+   model   : shown only if they ask for it
+   jury    : a question a jury could ask on this slide
+   hint    : how to handle that question
+   ============================================================ */
+const SLIDES = [
+ {n:1, sp:"a", title:"Title slide", job:"Introduce yourselves and the project. Twenty seconds, no more.",
+  facts:["Your names and your school","The title of the project","Who your supervisor is"],
+  words:["bacteriocin","geographical indication"],
+  conns:["Good morning","We are…","Our project is about…"],
+  model:"Good morning. My name is Beren and this is Poyraz. We are from TED Eskişehir Middle School. Our project is about bacteriocins from a traditional Turkish cheese.",
+  jury:"Whose idea was this project?",
+  hint:"Say honestly what came from you and what came from your teacher. Juries respect this."},
+
+ {n:3, sp:"a", title:"The current need", job:"Explain the problem with cancer treatment today. Do not read the slide.",
+  facts:["Chemotherapy harms healthy cells too","Cancer cells can become resistant over time","So we need something natural that targets only cancer cells"],
+  words:["toxic","resistant","cancer cells"],
+  conns:["The problem is…","Also…","So…"],
+  model:"The problem is that chemotherapy is toxic to healthy cells, not only to cancer cells. Also, cancer cells can become resistant to it. So we need a natural substance that kills only the cancer cells.",
+  jury:"Are there already drugs that only target cancer cells?",
+  hint:"Yes, some exist, but they are expensive and do not work for every cancer. Do not claim nothing exists."},
+
+ {n:4, sp:"a", title:"Aim", job:"State your three aims. Keep each one short.",
+  facts:["Isolate lactic acid bacteria from the cheese","Produce bacteriocins from those bacteria","Show whether they have an anti-cancer effect"],
+  words:["to isolate","lactic acid bacteria","bacteriocin"],
+  conns:["Our first aim was…","Then…","Finally…"],
+  model:"Our first aim was to isolate lactic acid bacteria from our cheese. Then, to produce bacteriocins from these bacteria. Finally, to show whether these bacteriocins have an anti-cancer effect.",
+  jury:"Why bacteriocins and not something else?",
+  hint:"Because bacteria cannot become resistant to them, and they are already in food we eat safely."},
+
+ {n:5, sp:"b", title:"The cheese", job:"Explain why this particular cheese was worth studying.",
+  facts:["Raw milk — no pasteurization, so the natural bacteria survive","Natural rennet, not an industrial starter culture","Ripens 5-6 months in a cave 36 metres underground"],
+  words:["raw milk","rennet","to ripen"],
+  conns:["We chose this cheese because…","First…","Second…","And…"],
+  model:"We chose this cheese because it is made in a very natural way. First, it is made from raw milk, so the natural bacteria are not killed. Second, it uses natural rennet. And it ripens for five months in a cave, 36 metres underground.",
+  jury:"Could you find the same bacteria in supermarket cheese?",
+  hint:"Probably not the same ones — industrial cheese uses a fixed starter culture, so the diversity is lower."},
+
+ {n:6, sp:"b", title:"Question and hypothesis", job:"Say your research question out loud, then your hypothesis.",
+  facts:["The question: can this cheese be a source for a cancer drug?","The hypothesis: natural conditions grow different bacteria","And those bacteria may make stronger bacteriocins"],
+  words:["research question","hypothesis"],
+  conns:["We asked one question:…","We thought that…","If that is true, then…"],
+  model:"We asked one question: could our traditional cheese be a source for a cancer drug? We thought that the natural conditions in the cave grow different bacteria from industrial cheese. If that is true, then their bacteriocins may be stronger.",
+  jury:"What would it mean if your hypothesis were wrong?",
+  hint:"It would still be a result. Say that a negative result is also useful information."},
+
+ {n:7, sp:"b", title:"What is a bacteriocin?", job:"Define it in your own words. This is the most important definition in the talk.",
+  facts:["It is a small protein — a peptide","Bacteria make it themselves","They use it to kill or block other bacteria"],
+  words:["bacteriocin","peptide","antimicrobial"],
+  conns:["A bacteriocin is…","Bacteria make them to…","In other words…"],
+  model:"A bacteriocin is a small protein — a peptide — that bacteria produce themselves. They make them to kill other bacteria around them, or to stop them from growing. In other words, it is a natural weapon between bacteria.",
+  jury:"How is that different from an antibiotic?",
+  hint:"Bacteria do not develop resistance to bacteriocins the way they do to antibiotics. This is the strongest answer you have."},
+
+ {n:12, sp:"a", title:"Step 1 — Isolation", job:"Walk the jury through how you got the bacteria out of the cheese.",
+  facts:["Mixed the cheese with salt water","Made dilutions so single colonies would grow","Spread them on MRS and M17 selective media","Incubated at 37 °C for 48 hours"],
+  words:["to isolate","dilution","culture medium","incubator","colony"],
+  conns:["First…","Then…","After that…","Finally…"],
+  model:"First we mixed the cheese with a salt solution. Then we made dilutions, so that single colonies could grow. After that we spread them on MRS and M17 selective media. Finally we incubated them at 37 degrees for 48 hours.",
+  jury:"Why two different media?",
+  hint:"MRS grows Lactobacillus, M17 grows Lactococcus. Each medium selects for one genus."},
+
+ {n:13, sp:"a", title:"Step 2 — Identification tests", job:"Explain the three tests and what each one told you.",
+  facts:["Gram staining — our bacteria turned purple, so Gram-positive","Catalase test — no bubbles, so catalase-negative","Oxidase test — no colour change, so oxidase-negative","All three match lactic acid bacteria"],
+  words:["Gram staining","catalase test","oxidase test","Gram-positive"],
+  conns:["We ran three tests.","The first was…","This told us that…","Together, these show…"],
+  model:"We ran three tests. The first was Gram staining: our bacteria turned purple, so they are Gram-positive. In the catalase test there were no bubbles, and in the oxidase test there was no colour change. Together, these results show that they are lactic acid bacteria.",
+  jury:"Why did you need a positive control in those tests?",
+  hint:"To prove the test itself was working. Without it, 'no bubbles' could just mean the test failed."},
+
+ {n:14, sp:"b", title:"Step 3 — Production and purification", job:"Explain how you got the bacteriocin out.",
+  facts:["Grew the bacteria in liquid broth for 48 hours","The bacteria release bacteriocins into the liquid","Spun it in a centrifuge to remove the bacteria","Purified the liquid by ultrafiltration"],
+  words:["broth","to purify","ultrafiltration"],
+  conns:["Next…","While they grow…","Then…","This gave us…"],
+  model:"Next we grew the bacteria in liquid broth for 48 hours. While they grow, they release bacteriocins into the liquid. Then we used a centrifuge to remove the bacteria, and purified the liquid by ultrafiltration. This gave us our two bacteriocins.",
+  jury:"How pure was your bacteriocin?",
+  hint:"Be honest: it was one purification step, not fully pure. Say that fuller purification is a next step."},
+
+ {n:17, sp:"b", title:"Disk diffusion result", job:"Show that what you made really is a bacteriocin.",
+  facts:["Put the substance on paper disks","Placed them on a plate growing S. aureus","Clear rings appeared around the disks","So the substance is antimicrobial"],
+  words:["disk diffusion test","zone of inhibition","antimicrobial"],
+  conns:["To check this, we…","As you can see…","This proves that…"],
+  model:"To check this, we put our substance on paper disks and placed them on a plate of Staphylococcus aureus. As you can see, clear rings appeared around the disks. This proves that our substance is antimicrobial — so it really is a bacteriocin.",
+  jury:"Could the clear ring come from something else in the liquid, like acid?",
+  hint:"A fair question. Say the ultrafiltration step removes small molecules like acids, so it is most likely the peptide."},
+
+ {n:18, sp:"a", title:"MTT test", job:"Explain what the purple colour means before you show the result.",
+  facts:["MTT turns purple only inside living cells","More purple means more living cells","Our wells stayed almost colourless","So almost all the cancer cells had died"],
+  words:["MTT assay","cell viability","negative control"],
+  conns:["This test measures…","As you can see in this photo…","Which means…"],
+  model:"This test measures cell viability. MTT turns purple only inside living cells, so more purple means more living cells. As you can see in this photo, our wells stayed almost colourless. Which means almost all of the cancer cells had died.",
+  jury:"How many times did you repeat this?",
+  hint:"Three times, and analysed with a t-test. Say the number — juries always want it."},
+
+ {n:19, sp:"a", title:"The graphs", job:"Point at the graph while you speak. Give the numbers.",
+  facts:["Lung cancer cell viability fell about 90%","Breast cancer cell viability fell about 80%","Both were stronger than nisin","Measured after 48 hours"],
+  words:["cell viability","nisin","positive control"],
+  conns:["As you can see in this graph…","Compared with nisin…","In other words…"],
+  model:"As you can see in this graph, lung cancer cell viability fell by about 90 per cent, and breast cancer by about 80 per cent, after 48 hours. Compared with nisin, our bacteriocins were stronger. In other words, our natural bacteriocins beat the commercial one.",
+  jury:"You say twice as effective — twice as effective at what exactly?",
+  hint:"Answer in terms of the viability percentage at the same dose and the same time point. Do not say 'twice as strong' without saying what you measured."},
+
+ {n:20, sp:"b", title:"PCNA and Caspase-3", job:"Explain the two glowing markers and what they proved.",
+  facts:["PCNA in the nucleus means the cell is still growing","PCNA moved to the cytoplasm in our treated cells","Caspase-3 only appears when a cell is dying","Caspase-3 glowed strongly in our treated cells"],
+  words:["immunofluorescence","PCNA","Caspase-3","apoptosis"],
+  conns:["We labelled two proteins.","When PCNA is…, it means…","On the other hand…","So we can say…"],
+  model:"We labelled two proteins. When PCNA is in the nucleus, it means the cell is still growing — and in our treated cells it had moved into the cytoplasm. On the other hand, Caspase-3 only appears when a cell is dying, and it glowed strongly. So we can say the cells were going through apoptosis.",
+  jury:"How do you know the cells died by apoptosis and not just burst?",
+  hint:"Caspase-3 is the evidence — it only activates in programmed cell death, not when a cell simply bursts."},
+
+ {n:22, sp:"a", title:"Conclusion", job:"Four sentences. Then stop and thank them.",
+  facts:["We produced bacteriocins from a traditional cheese","They killed lung and breast cancer cells","They worked better than commercial nisin","This could become a domestic raw material for drugs"],
+  words:["bacteriocin","cytotoxic","raw material"],
+  conns:["To sum up…","We also showed…","In the future…","Thank you for listening."],
+  model:"To sum up, we produced bacteriocins from a traditional Turkish cheese, and they killed lung and breast cancer cells. We also showed that they worked better than commercial nisin. In the future, this could become a domestic raw material for cancer drugs. Thank you for listening.",
+  jury:"Did you test your bacteriocins on healthy cells?",
+  hint:"⚠ This is the weak point of the project. The honest answer: no, not in this study — that is our next step. Do not claim you did."}
+];
+
+const $=s=>document.querySelector(s);
+const view=()=>$("#view");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const nameOf=sp=>(sp==="a"?$("#nameA").value:$("#nameB").value)||(sp==="a"?"Speaker A":"Speaker B");
+function say(t){if(!window.speechSynthesis)return;speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(t);const v=speechSynthesis.getVoices().find(x=>/^en/i.test(x.lang));
+ if(v)u.voice=v;u.rate=.85;speechSynthesis.speak(u);}
+
+let i=0;
+const state=SLIDES.map(s=>({facts:s.facts.map(()=>false),words:s.words.map(()=>false),conns:s.conns.map(()=>false),done:false}));
+
+function render(){
+  if(i>=SLIDES.length)return renderDone();
+  const s=SLIDES[i],st=state[i];
+  const nFacts=st.facts.filter(Boolean).length, nWords=st.words.filter(Boolean).length;
+
+  view().innerHTML=`
+   <div class="nav">
+     <button class="iconbtn" id="prev" ${i===0?"disabled":""}>←</button>
+     <div class="dots">${SLIDES.map((_,k)=>`<i class="${k===i?"on":(state[k].done?"past":"")}" data-k="${k}"></i>`).join("")}</div>
+     <span>${i+1}/${SLIDES.length}</span>
+   </div>
+   <div class="card">
+     <div class="slidetag">
+       <span class="slidenum">SLIDE ${s.n}</span>
+       <span class="speaker ${s.sp}">${esc(nameOf(s.sp))} speaks</span>
+     </div>
+     <h2 class="stitle">${esc(s.title)}</h2>
+     <p class="job">${esc(s.job)}</p>
+
+     <p class="lab">Your job is to get these across — in your own words</p>
+     <div class="facts">${s.facts.map((f,k)=>`
+       <button class="fact ${st.facts[k]?"on":""}" data-f="${k}"><span class="tick">${st.facts[k]?"✓":""}</span><span>${esc(f)}</span></button>`).join("")}</div>
+
+     <p class="lab">Use these terms</p>
+     <div class="words">${s.words.map((w,k)=>`<button class="${st.words[k]?"used":""}" data-w="${k}">${esc(w)}</button>`).join("")}</div>
+
+     <p class="lab">Link your sentences</p>
+     <div class="conns">${s.conns.map((c,k)=>`<button class="${st.conns[k]?"used":""}" data-c="${k}">${esc(c)}</button>`).join("")}</div>
+
+     <details class="model">
+       <summary>I'm stuck — show me one way of saying it</summary>
+       <p>${esc(s.model)}</p>
+       <p class="warn">This is one version, not the right answer. Say yours differently.</p>
+     </details>
+
+     <div class="jury" id="jury">
+       <b>The jury might ask</b>
+       <p>${esc(s.jury)}</p>
+       <div class="hintline">${esc(s.hint)}</div>
+       <button id="hintBtn">How would you answer?</button>
+     </div>
+
+     <div class="acts">
+       <button class="hear" id="hear" title="Hear the model">🔊</button>
+       <span class="hud">Covered <b>${nFacts}/${s.facts.length}</b> points · <b>${nWords}/${s.words.length}</b> terms</span>
+       <button class="btn go" id="next" style="margin-left:auto">${i===SLIDES.length-1?"Finish":"Said it →"}</button>
+     </div>
+   </div>
+   <p class="note">Tick a point only after you have actually said it out loud.</p>`;
+
+  view().querySelectorAll(".fact").forEach(b=>b.onclick=()=>{const k=+b.dataset.f;st.facts[k]=!st.facts[k];render();});
+  view().querySelectorAll(".words button").forEach(b=>b.onclick=()=>{const k=+b.dataset.w;st.words[k]=!st.words[k];render();});
+  view().querySelectorAll(".conns button").forEach(b=>b.onclick=()=>{const k=+b.dataset.c;st.conns[k]=!st.conns[k];render();});
+  view().querySelectorAll(".dots i").forEach(d=>d.onclick=()=>{i=+d.dataset.k;render();});
+  $("#hear").onclick=()=>say(s.model);
+  $("#hintBtn").onclick=()=>{$("#jury").classList.add("open");$("#hintBtn").style.display="none";};
+  $("#prev").onclick=()=>{i--;render();};
+  $("#next").onclick=()=>{st.done=true;i++;render();};
+}
+
+function renderDone(){
+  const pts=state.reduce((a,s)=>a+s.facts.filter(Boolean).length,0);
+  const tot=SLIDES.reduce((a,s)=>a+s.facts.length,0);
+  view().innerHTML=`<div class="done">
+    <div style="font-size:52px">🎤</div>
+    <p class="big">That was the whole talk</p>
+    <p>You covered <b>${pts} of ${tot}</b> points in your own words, across ${SLIDES.length} slides.
+       Now run it once more straight through, with nothing on the screen.</p>
+    <button class="btn ghost" id="again">Start again</button></div>`;
+  $("#again").onclick=()=>{i=0;state.forEach(s=>{s.done=false;});render();};
+}
+
+render();
+</script>
+</body>
+</html>
