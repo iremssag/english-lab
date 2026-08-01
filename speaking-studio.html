@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speaking Studio — Bacteriocin Project</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#241A46; --ink-60:rgba(36,26,70,.6); --ink-30:rgba(36,26,70,.3); --ink-12:rgba(36,26,70,.12);
+  --violet:#6B3FA0; --safranin:#E0517A; --agar:#EAD8A6; --agar-deep:#D9BF7E;
+  --glass:#DCE7EA; --fluoro:#1FB374; --fluoro-soft:#DCF5EA; --pink-soft:#FCE4EC;
+  --shadow:rgba(36,26,70,.16);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  background:radial-gradient(circle at 12% 6%,#fff 0%,transparent 42%),
+             radial-gradient(circle at 88% 94%,#fff 0%,transparent 38%),var(--glass);
+  color:var(--ink);-webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--violet);outline-offset:3px}
+.wrap{max-width:740px;margin:0 auto;padding:18px 16px 70px}
+
+.topbar{display:flex;align-items:center;gap:12px;padding:8px 0 20px;flex-wrap:wrap}
+.brand{font-family:Archivo;font-weight:900;font-size:19px;letter-spacing:-.02em;text-transform:uppercase;margin:0}
+.brand em{font-style:normal;color:var(--safranin)}
+.who{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12px;color:var(--ink-60)}
+.who input{
+  width:88px;border:0;border-radius:9px;padding:7px 10px;font-family:inherit;font-size:13px;font-weight:600;
+  background:#fff;color:var(--ink);box-shadow:0 2px 6px var(--shadow);
+}
+.who input.a{color:var(--violet)} .who input.b{color:var(--safranin)}
+
+/* ---------- rounds ---------- */
+.rounds{display:grid;gap:10px;margin-bottom:20px}
+.round{
+  display:flex;align-items:center;gap:14px;text-align:left;border:0;border-radius:16px;
+  background:#fff;padding:14px 16px;box-shadow:0 4px 0 var(--ink-12);transition:.14s;width:100%;
+}
+.round:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--ink-12)}
+.round .num{
+  font-family:Archivo;font-weight:900;font-size:19px;width:42px;height:42px;flex:none;border-radius:50%;
+  background:var(--agar);display:flex;align-items:center;justify-content:center;
+}
+.round.done .num{background:var(--fluoro);color:#fff}
+.round h3{font-family:Archivo;font-weight:900;font-size:16px;margin:0 0 2px;letter-spacing:-.01em}
+.round p{margin:0;font-size:13px;color:var(--ink-60);line-height:1.45}
+.meter{width:78px;flex:none;text-align:right}
+.meter .bar{height:7px;border-radius:99px;background:var(--ink-12);overflow:hidden;margin-bottom:4px}
+.meter .bar i{display:block;height:100%;background:var(--violet)}
+.meter span{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-30)}
+
+/* ---------- stage ---------- */
+.stagebar{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.back{border:0;background:transparent;font-size:22px;color:var(--ink-30);padding:0 4px}
+.dots{display:flex;gap:5px;flex:1;flex-wrap:wrap}
+.dots i{width:100%;max-width:22px;height:6px;border-radius:99px;background:var(--ink-12);flex:1}
+.dots i.on{background:var(--violet)}
+.dots i.past{background:var(--ink-30)}
+
+.card{background:#fff;border-radius:22px;padding:24px 22px;box-shadow:0 10px 28px -16px var(--shadow)}
+.speaker{
+  display:inline-flex;align-items:center;gap:8px;font-family:Archivo;font-weight:700;font-size:11px;
+  letter-spacing:.14em;text-transform:uppercase;padding:6px 12px;border-radius:99px;margin-bottom:14px;
+}
+.speaker.a{background:#F3EEFA;color:var(--violet)}
+.speaker.b{background:var(--pink-soft);color:#B2325C}
+.beat{font-family:Archivo;font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-30);margin:0 0 10px}
+
+.line{font-family:Archivo;font-weight:700;font-size:clamp(19px,4vw,26px);line-height:1.4;letter-spacing:-.015em;margin:0}
+.line.dim{color:var(--ink-30);font-weight:500}
+.keys{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.keys span{font-size:12px;font-weight:600;background:var(--agar);border-radius:8px;padding:6px 11px}
+
+.gapline{font-family:Archivo;font-weight:700;font-size:clamp(17px,3.4vw,23px);line-height:2.1;letter-spacing:-.01em;margin:0}
+.gap{
+  display:inline-block;min-width:92px;border-bottom:3px solid var(--ink-30);margin:0 3px;text-align:center;
+  color:var(--violet);cursor:pointer;padding:0 6px;
+}
+.gap.filled{border-bottom-color:var(--violet)}
+.gap.ok{color:var(--fluoro);border-bottom-color:var(--fluoro)}
+.gap.no{color:var(--safranin);border-bottom-color:var(--safranin)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.chip{
+  border:0;background:#F6F8F9;border-radius:11px;padding:10px 15px;font-size:14.5px;font-weight:600;color:var(--ink);
+  box-shadow:inset 0 0 0 2px var(--ink-12);
+}
+.chip.used{opacity:.3;pointer-events:none}
+
+.cue{
+  margin-top:20px;padding:14px 16px;background:var(--fluoro-soft);border-radius:14px;
+  font-size:14px;line-height:1.55;color:#12805A;
+}
+.cue b{font-family:Archivo;font-weight:900;display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px}
+
+.acts{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;align-items:center}
+.btn{
+  font-family:Archivo;font-weight:700;font-size:15px;border:0;border-radius:14px;padding:13px 24px;
+  background:var(--ink);color:#fff;box-shadow:0 4px 0 rgba(36,26,70,.45);transition:.12s;
+}
+.btn:hover:not(:disabled){transform:translateY(-1px)}
+.btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 rgba(36,26,70,.45)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.go{background:var(--fluoro);box-shadow:0 4px 0 #148554}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink-30);font-weight:600}
+.btn.sm{padding:9px 15px;font-size:13px;border-radius:11px;box-shadow:0 3px 0 rgba(36,26,70,.3)}
+.hear{border:0;background:var(--violet);color:#fff;width:46px;height:46px;border-radius:14px;font-size:19px;box-shadow:0 4px 0 #4E2C77;flex:none}
+.hear:active{transform:translateY(3px);box-shadow:0 1px 0 #4E2C77}
+
+/* ---------- connectors drawer ---------- */
+.drawer{margin-top:18px}
+.drawer summary{
+  cursor:pointer;font-family:Archivo;font-weight:700;font-size:13px;letter-spacing:.04em;
+  color:var(--violet);padding:10px 0;list-style:none;
+}
+.drawer summary::-webkit-details-marker{display:none}
+.drawer summary::before{content:"▸ ";transition:.2s;display:inline-block}
+.drawer[open] summary::before{transform:rotate(90deg)}
+.conn{display:grid;gap:8px;background:#fff;border-radius:16px;padding:16px;box-shadow:0 6px 20px -14px var(--shadow)}
+.conn div{display:flex;gap:12px;font-size:14px;line-height:1.5;align-items:baseline}
+.conn b{font-family:Archivo;font-weight:900;color:var(--violet);min-width:104px;flex:none;font-size:13px}
+
+/* ---------- finish ---------- */
+.finish{text-align:center;padding:24px 8px}
+.finish .big{font-family:Archivo;font-weight:900;font-size:clamp(24px,6vw,36px);letter-spacing:-.03em;margin:14px 0 8px}
+.check{text-align:left;max-width:430px;margin:22px auto;display:grid;gap:10px}
+.check label{
+  display:flex;gap:12px;align-items:flex-start;background:#fff;border-radius:14px;padding:14px 16px;
+  font-size:14.5px;line-height:1.5;box-shadow:0 5px 16px -12px var(--shadow);cursor:pointer;
+}
+.check input{margin-top:3px;width:18px;height:18px;accent-color:var(--fluoro);flex:none}
+
+.script{background:#fff;border-radius:18px;padding:20px;text-align:left;box-shadow:0 8px 24px -16px var(--shadow);margin-top:8px}
+.script p{margin:0 0 12px;font-size:15px;line-height:1.6}
+.script .who2{font-family:Archivo;font-weight:900;font-size:10px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:2px}
+.script .who2.a{color:var(--violet)} .script .who2.b{color:#B2325C}
+
+.note{font-size:12.5px;color:var(--ink-60);line-height:1.6;text-align:center;margin:26px auto 0;max-width:520px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <h1 class="brand">Speaking <em>Studio</em></h1>
+    <div class="who">
+      <span>A:</span><input class="a" id="nameA" value="Speaker A" maxlength="12">
+      <span>B:</span><input class="b" id="nameB" value="Speaker B" maxlength="12">
+    </div>
+  </div>
+  <main id="view"></main>
+</div>
+
+<script>
+/* ============================================================
+   THE SCRIPT — ten beats of the opening.  Edit freely.
+   sp    : which speaker (a / b)
+   beat  : the label shown in round 4
+   full  : the model sentence
+   gap   : same sentence with {} where words are removed
+   ans   : the removed words, in order
+   start : the sentence opener shown in round 3
+   keys  : keyword prompts for round 3
+   ============================================================ */
+const BEATS = [
+ {sp:"a", beat:"Greeting",
+  full:"Good morning. We are going to tell you about our project on bacteriocins.",
+  gap:"Good morning. We are {} to tell you about our {} on {}.",
+  ans:["going","project","bacteriocins"],
+  start:"Good morning. We are…", keys:["greeting","our project","bacteriocins"]},
+
+ {sp:"a", beat:"The problem",
+  full:"Cancer treatments today kill healthy cells as well as cancer cells.",
+  gap:"Cancer treatments today {} healthy cells as well as {} cells.",
+  ans:["kill","cancer"],
+  start:"Cancer treatments today…", keys:["treatments","kill","healthy cells"]},
+
+ {sp:"a", beat:"The question",
+  full:"So we asked one question: can a natural substance kill only the cancer cells?",
+  gap:"So we asked one {}: can a natural {} kill only the cancer cells?",
+  ans:["question","substance"],
+  start:"So we asked one question:…", keys:["question","natural substance","only"]},
+
+ {sp:"b", beat:"Handover",
+  full:"Now my partner will tell you where we looked for the answer.",
+  gap:"Now my {} will tell you where we {} for the answer.",
+  ans:["partner","looked"],
+  start:"Now my partner…", keys:["handover","where we looked"]},
+
+ {sp:"b", beat:"The source",
+  full:"We looked inside a traditional Turkish cheese that ripens in a cave.",
+  gap:"We looked inside a {} Turkish cheese that {} in a cave.",
+  ans:["traditional","ripens"],
+  start:"We looked inside…", keys:["traditional cheese","cave","ripens"]},
+
+ {sp:"b", beat:"What we did",
+  full:"First we isolated lactic acid bacteria from the cheese, and then we produced bacteriocins from them.",
+  gap:"First we {} lactic acid bacteria from the cheese, and then we {} bacteriocins from them.",
+  ans:["isolated","produced"],
+  start:"First we isolated…", keys:["first","isolate","then","produce"]},
+
+ {sp:"b", beat:"The test",
+  full:"After that, we added our bacteriocins to lung and breast cancer cells.",
+  gap:"After that, we {} our bacteriocins to {} and breast cancer cells.",
+  ans:["added","lung"],
+  start:"After that, we…", keys:["after that","added","lung and breast"]},
+
+ {sp:"a", beat:"The result",
+  full:"As you can see in this graph, almost all of the cancer cells died.",
+  gap:"As you can {} in this {}, almost all of the cancer cells died.",
+  ans:["see","graph"],
+  start:"As you can see in this graph,…", keys:["as you can see","graph","almost all"]},
+
+ {sp:"a", beat:"The comparison",
+  full:"Our bacteriocins worked better than nisin, the bacteriocin you can buy in a shop.",
+  gap:"Our bacteriocins worked {} than {}, the bacteriocin you can buy in a shop.",
+  ans:["better","nisin"],
+  start:"Our bacteriocins worked…", keys:["better than","nisin","you can buy"]},
+
+ {sp:"b", beat:"Closing",
+  full:"To sum up, a traditional cheese could become a raw material for cancer drugs. Thank you for listening.",
+  gap:"To {} up, a traditional cheese could become a raw {} for cancer drugs. Thank you for listening.",
+  ans:["sum","material"],
+  start:"To sum up,…", keys:["to sum up","raw material","thank you"]}
+];
+
+const CONNECTORS = [
+ ["First…",            "the very first step you took"],
+ ["Then… / After that…","every step after the first one"],
+ ["So…",               "the reason you did something"],
+ ["As you can see…",   "when you point at a graph or a photo"],
+ ["better than…",      "when you compare two things"],
+ ["To sum up…",        "the last sentence of the whole talk"],
+ ["Now my partner will…","when you hand the talk to the other speaker"]
+];
+
+const ROUNDS = [
+ {n:"Read it",     d:"The whole sentence is given. Read it out loud, twice.",           support:100},
+ {n:"Complete it", d:"Some words are missing. Fill them in, then say the whole sentence.", support:65},
+ {n:"Continue it", d:"Only the opening words. You finish the sentence yourself.",       support:30},
+ {n:"Own it",      d:"Only the topic. Say the sentence from memory.",                   support:0}
+];
+
+const CHECKS = [
+ "I said every sentence out loud — not in my head.",
+ "I did not stop in the middle of a sentence.",
+ "I used at least one connector word (First, Then, As you can see, To sum up)."
+];
+
+/* ============================================================ */
+const $ = s => document.querySelector(s);
+const view = () => $("#view");
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle = a => {a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;};
+const nameOf = sp => (sp==="a" ? $("#nameA").value : $("#nameB").value) || (sp==="a"?"Speaker A":"Speaker B");
+
+let round = 0, idx = 0, doneRounds = {};
+
+function say(t){
+  if(!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(t);
+  const v = speechSynthesis.getVoices().find(x=>/^en/i.test(x.lang));
+  if(v) u.voice = v;
+  u.rate = .85;
+  speechSynthesis.speak(u);
+}
+
+/* ---------------- home ---------------- */
+function renderHome(){
+  view().innerHTML = `
+    <p class="note" style="margin:0 0 18px;text-align:left;max-width:none">
+      Ten sentences — the first minute of your presentation. You will say them four times.
+      Each time, the screen helps you a little less.</p>
+    <div class="rounds">
+      ${ROUNDS.map((r,i)=>`
+        <button class="round ${doneRounds[i]?"done":""}" data-r="${i}">
+          <span class="num">${doneRounds[i]?"✓":i+1}</span>
+          <span style="flex:1"><h3>${esc(r.n)}</h3><p>${esc(r.d)}</p></span>
+          <span class="meter"><span class="bar"><i style="width:${r.support}%"></i></span><span>help ${r.support}%</span></span>
+        </button>`).join("")}
+    </div>
+    <details class="drawer">
+      <summary>Connector words — the glue of a talk</summary>
+      <div class="conn">${CONNECTORS.map(c=>`<div><b>${esc(c[0])}</b><span>${esc(c[1])}</span></div>`).join("")}</div>
+    </details>
+    <div class="acts" style="justify-content:center">
+      <button class="btn ghost sm" id="showScript">See the whole script</button>
+    </div>
+    <p class="note">Tip: stand up. You will present standing, so practise standing.</p>`;
+  view().querySelectorAll(".round").forEach(b=> b.onclick = ()=>startRound(+b.dataset.r));
+  $("#showScript").onclick = renderScript;
+}
+
+/* ---------------- the full script ---------------- */
+function renderScript(){
+  view().innerHTML = `
+    <button class="btn ghost sm" id="back" style="margin-bottom:16px">← Back</button>
+    <div class="script">
+      ${BEATS.map(b=>`<p><span class="who2 ${b.sp}">${esc(nameOf(b.sp))}</span>${esc(b.full)}</p>`).join("")}
+    </div>
+    <div class="acts" style="justify-content:center">
+      <button class="hear" id="readAll" aria-label="Hear the whole script">🔊</button>
+    </div>`;
+  $("#back").onclick = renderHome;
+  $("#readAll").onclick = ()=> say(BEATS.map(b=>b.full).join(" "));
+}
+
+/* ---------------- a round ---------------- */
+function startRound(r){ round = r; idx = 0; renderBeat(); }
+
+function renderBeat(){
+  if(idx >= BEATS.length) return renderFinish();
+  const b = BEATS[idx];
+  let body = "";
+
+  if(round === 0){
+    body = `<p class="line">${esc(b.full)}</p>
+            <div class="acts"><button class="hear" id="hear" aria-label="Hear it">🔊</button>
+            <span style="font-size:13px;color:var(--ink-60)">Listen, then say it out loud twice.</span></div>`;
+  }
+
+  if(round === 1){
+    const parts = b.gap.split("{}");
+    let html = "";
+    parts.forEach((p,i)=>{
+      html += esc(p);
+      if(i < b.ans.length) html += `<span class="gap" data-g="${i}" data-w=""></span>`;
+    });
+    const chips = shuffle([...b.ans, ...distract(b.ans)]);
+    body = `<p class="gapline" id="gapline">${html}</p>
+            <div class="chips" id="chips">${chips.map(w=>`<button class="chip" data-w="${esc(w)}">${esc(w)}</button>`).join("")}</div>
+            <div class="acts"><button class="btn go" id="checkBtn">Check</button>
+            <button class="btn ghost sm" id="clearBtn">Clear</button></div>`;
+  }
+
+  if(round === 2){
+    body = `<p class="line">${esc(b.start)}</p>
+            <p class="line dim" style="font-size:16px;margin-top:8px">…finish the sentence yourself.</p>
+            <div class="keys">${b.keys.map(k=>`<span>${esc(k)}</span>`).join("")}</div>`;
+  }
+
+  if(round === 3){
+    body = `<p class="line" style="font-size:clamp(24px,6vw,34px)">${esc(b.beat)}</p>
+            <p class="line dim" style="font-size:16px;margin-top:10px">Say the whole sentence from memory.</p>`;
+  }
+
+  const cue = b.beat === "Handover"
+    ? `<div class="cue"><b>Handover</b>${esc(nameOf("a"))} stops here and ${esc(nameOf("b"))} takes over. Look at your partner when you say this sentence — the audience will follow your eyes.</div>`
+    : (idx === 0 ? `<div class="cue"><b>Before you start</b>Stand up. Take one breath. Look at the camera, not at the screen.</div>` : "");
+
+  view().innerHTML = `
+    <div class="stagebar">
+      <button class="back" id="back" aria-label="Back">×</button>
+      <div class="dots">${BEATS.map((_,i)=>`<i class="${i===idx?"on":(i<idx?"past":"")}"></i>`).join("")}</div>
+      <span style="font-size:12px;color:var(--ink-30);font-weight:600">${idx+1}/${BEATS.length}</span>
+    </div>
+    <div class="card">
+      <span class="speaker ${b.sp}">${esc(nameOf(b.sp))}</span>
+      <p class="beat">Round ${round+1} · ${esc(ROUNDS[round].n)}</p>
+      ${body}
+      ${cue}
+    </div>
+    <details class="drawer"><summary>Need a connector word?</summary>
+      <div class="conn">${CONNECTORS.map(c=>`<div><b>${esc(c[0])}</b><span>${esc(c[1])}</span></div>`).join("")}</div>
+    </details>
+    <div class="acts">
+      <button class="btn ghost sm" id="prev" ${idx===0?"disabled":""}>← Back</button>
+      <button class="btn go" id="next" style="margin-left:auto">${idx===BEATS.length-1?"Finish":"I said it →"}</button>
+    </div>`;
+
+  $("#back").onclick = renderHome;
+  $("#prev").onclick = ()=>{ idx--; renderBeat(); };
+  $("#next").onclick = ()=>{ idx++; renderBeat(); };
+  if($("#hear")) $("#hear").onclick = ()=>say(b.full);
+  if(round === 1) wireGaps(b);
+}
+
+function distract(ans){
+  const pool = ["quickly","cheese","bacteria","tested","because","cells","result","strong","medium","after"];
+  return shuffle(pool.filter(w=>!ans.includes(w))).slice(0,3);
+}
+
+function wireGaps(b){
+  const gaps = ()=> [...view().querySelectorAll(".gap")];
+  view().querySelectorAll(".chip").forEach(ch=>{
+    ch.onclick = ()=>{
+      const g = gaps().find(x=>!x.dataset.w);
+      if(!g) return;
+      g.textContent = ch.dataset.w; g.dataset.w = ch.dataset.w;
+      g.classList.add("filled"); ch.classList.add("used");
+    };
+  });
+  gaps().forEach(g=>{
+    g.onclick = ()=>{
+      if(!g.dataset.w) return;
+      const chip = [...view().querySelectorAll(".chip")].find(c=>c.dataset.w===g.dataset.w && c.classList.contains("used"));
+      if(chip) chip.classList.remove("used");
+      g.textContent = ""; g.dataset.w = ""; g.className = "gap";
+    };
+  });
+  $("#clearBtn").onclick = ()=>{
+    gaps().forEach(g=>{ g.textContent=""; g.dataset.w=""; g.className="gap"; });
+    view().querySelectorAll(".chip").forEach(c=>c.classList.remove("used"));
+  };
+  $("#checkBtn").onclick = ()=>{
+    let all = true;
+    gaps().forEach((g,i)=>{
+      const ok = g.dataset.w === b.ans[i];
+      g.className = "gap filled " + (ok ? "ok" : "no");
+      if(!ok){ all = false; g.textContent = b.ans[i]; g.dataset.w = b.ans[i]; }
+    });
+    say(b.full);
+    $("#checkBtn").textContent = all ? "All correct — now say it" : "Fixed — now say it out loud";
+    $("#checkBtn").disabled = true;
+  };
+}
+
+/* ---------------- end of round ---------------- */
+function renderFinish(){
+  doneRounds[round] = true;
+  const last = round === ROUNDS.length - 1;
+  view().innerHTML = `
+    <div class="finish">
+      <div style="font-size:52px">${last ? "🎤" : "🧫"}</div>
+      <p class="big">${last ? "You can do the whole opening" : "Round " + (round+1) + " done"}</p>
+      <p style="color:var(--ink-60);margin:0">${last
+        ? "Ten sentences, two speakers, no screen. That is the first minute of your talk."
+        : esc(ROUNDS[round].n) + " → next: " + esc(ROUNDS[round+1].n) + ", with less help."}</p>
+      <div class="check">${CHECKS.map((c,i)=>`<label><input type="checkbox"><span>${esc(c)}</span></label>`).join("")}</div>
+      <div class="acts" style="justify-content:center">
+        ${last ? "" : `<button class="btn go" id="nextRound">Round ${round+2} →</button>`}
+        <button class="btn ghost sm" id="home">All rounds</button>
+      </div>
+      ${last ? `<p class="note">Now do it once more with nothing on the screen at all — just the two of you.</p>` : ""}
+    </div>`;
+  if($("#nextRound")) $("#nextRound").onclick = ()=>startRound(round+1);
+  $("#home").onclick = renderHome;
+}
+
+renderHome();
+</script>
+</body>
+</html>
