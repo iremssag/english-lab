@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bacteriocin Lab — Practice App</title>
+<style>
+  :root{
+    --ink:#122622;
+    --ink-soft:#3c534c;
+    --bg:#EDF3EE;
+    --panel:#FFFFFF;
+    --line:#CBD9CF;
+    --teal:#0F6E56;
+    --teal-deep:#0A4B3B;
+    --teal-tint:#DCEFE7;
+    --amber:#C97B2E;
+    --amber-tint:#F6E4CC;
+    --amber-deep:#7A4715;
+    --red:#B5442E;
+    --red-tint:#F4DCD5;
+    --red-deep:#7A2C1C;
+    --mono: 'Courier New', ui-monospace, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    min-height:100vh;
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+  }
+  .masthead{
+    border-bottom:2px solid var(--ink);
+    padding-bottom:14px;
+    margin-bottom:22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .masthead .label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .masthead h1{
+    font-family:var(--serif);
+    font-size:28px;
+    font-weight:700;
+    margin:2px 0 0;
+    color:var(--teal-deep);
+  }
+  .specimen-tag{
+    font-family:var(--mono);
+    font-size:11px;
+    background:var(--ink);
+    color:var(--bg);
+    padding:4px 10px;
+    border-radius:2px;
+    white-space:nowrap;
+  }
+  .tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:24px;
+  }
+  .tab-btn{
+    flex:1;
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    padding:12px 10px;
+    background:var(--panel);
+    border:1.5px solid var(--line);
+    color:var(--ink-soft);
+    cursor:pointer;
+    border-radius:3px;
+  }
+  .tab-btn.active{
+    border-color:var(--teal);
+    background:var(--teal-tint);
+    color:var(--teal-deep);
+    font-weight:700;
+  }
+  .screen{display:none;}
+  .screen.active{display:block;}
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:20px;
+  }
+  .intro{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    line-height:1.55;
+    margin:0 0 18px;
+  }
+  /* Matching game */
+  .board{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  .col-title{
+    font-family:var(--mono);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    margin:0 0 8px;
+  }
+  .card-btn{
+    display:block;
+    width:100%;
+    text-align:left;
+    padding:11px 12px;
+    margin-bottom:8px;
+    font-size:13.5px;
+    font-family:var(--sans);
+    border-radius:4px;
+    border:1.5px solid var(--line);
+    background:var(--panel);
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .card-btn:hover{border-color:var(--teal);}
+  .card-btn.selected{
+    border-color:var(--teal);
+    background:var(--teal-tint);
+  }
+  .card-btn.solved{
+    border-color:var(--teal-deep);
+    background:var(--teal-deep);
+    color:#fff;
+    cursor:default;
+  }
+  #reveal{margin-top:18px;}
+  .reveal-item{
+    padding:10px 12px;
+    margin-bottom:8px;
+    background:var(--amber-tint);
+    border-left:3px solid var(--amber);
+    border-radius:0;
+    font-size:13px;
+    color:var(--amber-deep);
+  }
+  .reveal-item b{font-weight:700;}
+  #progress-line{
+    margin-top:16px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .reset-btn{
+    margin-top:14px;
+    font-family:var(--mono);
+    font-size:12px;
+    padding:8px 14px;
+    background:var(--ink);
+    color:var(--bg);
+    border:none;
+    border-radius:3px;
+    cursor:pointer;
+    display:none;
+  }
+  /* Speaking practice */
+  .cat-tag{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    padding:3px 9px;
+    border-radius:2px;
+    margin-bottom:10px;
+  }
+  .cat-aim{background:var(--teal-tint);color:var(--teal-deep);}
+  .cat-method{background:var(--amber-tint);color:var(--amber-deep);}
+  .cat-results{background:var(--red-tint);color:var(--red-deep);}
+  .cat-reflect{background:#E4E1F0;color:#3C3170;}
+  #q-text{
+    font-family:var(--serif);
+    font-size:19px;
+    line-height:1.4;
+    color:var(--ink);
+    margin:0 0 16px;
+    min-height:52px;
+  }
+  .timer-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:16px 0;
+  }
+  #timer-display{
+    font-family:var(--mono);
+    font-size:26px;
+    font-weight:700;
+    color:var(--teal-deep);
+    min-width:56px;
+  }
+  .small-btn{
+    font-family:var(--mono);
+    font-size:12px;
+    padding:8px 14px;
+    border-radius:3px;
+    border:1.5px solid var(--ink);
+    background:var(--panel);
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .small-btn.primary{
+    background:var(--teal);
+    border-color:var(--teal);
+    color:#fff;
+  }
+  .action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+  #hint-box{
+    margin-top:16px;
+    padding:12px 14px;
+    background:var(--teal-tint);
+    border-left:3px solid var(--teal);
+    font-size:13px;
+    color:var(--teal-deep);
+    display:none;
+  }
+  #hint-box ul{margin:6px 0 0;padding-left:18px;}
+  #hint-box li{margin-bottom:4px;}
+  @media (max-width:520px){
+    .board{grid-template-columns:1fr;}
+    .masthead h1{font-size:22px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <div class="label">Obruk Tulum Cheese — Research English Lab</div>
+      <h1>Bacteriocin Lab Practice</h1>
+    </div>
+    <div class="specimen-tag">SAMPLE B1 / B2</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-match" onclick="showScreen('match')">Phrase Match</button>
+    <button class="tab-btn" id="tab-speak" onclick="showScreen('speak')">Jury Speaking Practice</button>
+  </div>
+
+  <!-- MATCH SCREEN -->
+  <div class="screen active" id="screen-match">
+    <div class="panel">
+      <p class="intro">Tap an English pattern, then tap its Turkish meaning. A correct match reveals a real sentence from the presentation using that pattern.</p>
+      <div class="board">
+        <div>
+          <p class="col-title">English pattern</p>
+          <div id="col-en"></div>
+        </div>
+        <div>
+          <p class="col-title">Turkish meaning</p>
+          <div id="col-tr"></div>
+        </div>
+      </div>
+      <div id="progress-line"></div>
+      <div id="reveal"></div>
+      <button class="reset-btn" id="reset-match" onclick="resetMatch()">Play again</button>
+    </div>
+  </div>
+
+  <!-- SPEAKING SCREEN -->
+  <div class="screen" id="screen-speak">
+    <div class="panel">
+      <p class="intro">Imagine a competition jury is asking about your project. Read the question, press start, and speak for the full time without stopping. Use the hint if you get stuck.</p>
+      <span class="cat-tag" id="q-cat">Aim</span>
+      <p id="q-text">Press "New question" to begin.</p>
+
+      <div class="timer-row">
+        <span id="timer-display">0:45</span>
+        <button class="small-btn primary" id="start-btn" onclick="toggleTimer()">Start</button>
+        <button class="small-btn" onclick="resetTimer()">Reset</button>
+      </div>
+
+      <div class="action-row">
+        <button class="small-btn" onclick="nextQuestion()">New question</button>
+        <button class="small-btn" onclick="toggleHint()">Show vocabulary hint</button>
+      </div>
+
+      <div id="hint-box"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showScreen(name){
+  document.getElementById('screen-match').classList.toggle('active', name==='match');
+  document.getElementById('screen-speak').classList.toggle('active', name==='speak');
+  document.getElementById('tab-match').classList.toggle('active', name==='match');
+  document.getElementById('tab-speak').classList.toggle('active', name==='speak');
+}
+
+/* ---------- MATCH GAME ---------- */
+var pairs = [
+ {en:"isolate ... from ...", tr:"...den izole etmek / ayirmak", ex:"To isolate lactic acid bacteria from our geographical indication cheese."},
+ {en:"produce ... from ...", tr:"...den uretmek", ex:"To produce bacteriocins from these bacteria."},
+ {en:"be treated with ...", tr:"... ile muamele edilmek", ex:"In the wells treated with Nisin, some of the cancer cells had died."},
+ {en:"be grown on / in ...", tr:"... uzerinde uretilmek, buyutulmek", ex:"The bacteria we grew on a small scale in broth produced bacteriocins."},
+ {en:"carry out (a test)", tr:"(bir testi) gerceklestirmek", ex:"SDS-PAGE gel electrophoresis was carried out."},
+ {en:"demonstrate", tr:"gostermek, kanitlamak", ex:"To demonstrate the anti-cancer effects of this product."},
+ {en:"target and kill", tr:"hedef alip oldurmek", ex:"Drug raw materials that target and kill only cancer cells."},
+ {en:"turn into", tr:"donusturmek, -e donusmek", ex:"A raw material that could be turned into products for different uses."},
+ {en:"fall by (a percentage)", tr:"(bir yuzde kadar) dusmek, azalmak", ex:"Lung cancer cell viability fell by about 90%."},
+ {en:"insert / put ... into ...", tr:"...in icine koymak, sokmak", ex:"You insert the sample into the wells before adding the dye."}
+];
+var shuffledEn, shuffledTr, selectedEn, selectedTr, solved;
+
+function shuffle(arr){
+  return arr.map(function(a){return [Math.random(),a];}).sort(function(a,b){return a[0]-b[0];}).map(function(a){return a[1];});
+}
+
+function initMatch(){
+  shuffledEn = shuffle(pairs.slice());
+  shuffledTr = shuffle(pairs.slice());
+  selectedEn = null;
+  selectedTr = null;
+  solved = {};
+  document.getElementById('reveal').innerHTML = '';
+  document.getElementById('reset-match').style.display = 'none';
+  renderMatch();
+}
+
+function countSolved(){
+  var c=0;
+  for(var k in solved){ if(solved.hasOwnProperty(k)) c++; }
+  return c;
+}
+
+function renderMatch(){
+  var colEn = document.getElementById('col-en');
+  var colTr = document.getElementById('col-tr');
+  colEn.innerHTML='';
+  colTr.innerHTML='';
+  shuffledEn.forEach(function(p){
+    var btn = document.createElement('button');
+    btn.className = 'card-btn';
+    btn.textContent = p.en;
+    if(solved[p.en]){ btn.classList.add('solved'); }
+    else if(selectedEn===p.en){ btn.classList.add('selected'); btn.onclick=function(){}; }
+    if(!solved[p.en]){
+      btn.onclick = function(){ selectedEn = p.en; checkMatch(); renderMatch(); };
+    }
+    colEn.appendChild(btn);
+  });
+  shuffledTr.forEach(function(p){
+    var btn = document.createElement('button');
+    btn.className = 'card-btn';
+    btn.textContent = p.tr;
+    if(solved[p.en]){ btn.classList.add('solved'); }
+    else if(selectedTr===p.en){ btn.classList.add('selected'); }
+    if(!solved[p.en]){
+      btn.onclick = function(){ selectedTr = p.en; checkMatch(); renderMatch(); };
+    }
+    colTr.appendChild(btn);
+  });
+  document.getElementById('progress-line').textContent = countSolved() + ' / ' + pairs.length + ' matched';
+  if(countSolved()===pairs.length){
+    document.getElementById('reset-match').style.display='inline-block';
+  }
+}
+
+function checkMatch(){
+  if(selectedEn && selectedTr){
+    if(selectedEn===selectedTr){
+      solved[selectedEn]=true;
+      var p=null;
+      for(var i=0;i<pairs.length;i++){ if(pairs[i].en===selectedEn){ p=pairs[i]; break; } }
+      var div = document.createElement('div');
+      div.className='reveal-item';
+      div.innerHTML = '<b>'+p.en+'</b> — '+p.ex;
+      document.getElementById('reveal').insertBefore(div, document.getElementById('reveal').firstChild);
+    }
+    selectedEn=null;
+    selectedTr=null;
+  }
+}
+
+function resetMatch(){ initMatch(); }
+
+/* ---------- SPEAKING PRACTICE ---------- */
+var questions = [
+ {cat:"Aim", label:"Aim", q:"Why did you choose Obruk Tulum cheese for this project?", hints:["geographical indication cheese","traditional product unique to Turkiye","natural microbial diversity"]},
+ {cat:"Aim", label:"Aim", q:"What is a bacteriocin, in your own words?", hints:["antimicrobial peptide","produced by lactic acid bacteria","kill other bacteria / stop them multiplying"]},
+ {cat:"Aim", label:"Aim", q:"Why is it important to find cancer treatments with low toxicity?", hints:["chemotherapy is toxic to all cells","cancer cells can develop resistance","target and kill only cancer cells"]},
+ {cat:"Method", label:"Method", q:"Can you explain the steps you followed to isolate the lactic acid bacteria?", hints:["isolate ... from ...","on selective media","identification tests"]},
+ {cat:"Method", label:"Method", q:"How did you confirm the bacteria you isolated were really lactic acid bacteria?", hints:["Gram staining (purple / red)","catalase test (bubbling)","oxidase test (colour change)"]},
+ {cat:"Method", label:"Method", q:"What is the disk diffusion test used for?", hints:["identify the bacteriocin","demonstrate anti-microbial effect","substance identification"]},
+ {cat:"Method", label:"Method", q:"Why did you use immunofluorescence microscopy in your project?", hints:["PCNA — marker of cell proliferation","Caspase-3 — marker of cell death","test the anti-cancer effect"]},
+ {cat:"Results", label:"Results", q:"What did the MTT test results show?", hints:["cell viability test","most cancer cells had died","no clear purple colour appeared"]},
+ {cat:"Results", label:"Results", q:"How much did lung and breast cancer cell viability decrease in your experiment?", hints:["fall by about 90% (lung)","fall by about 80% (breast)","after 48 hours"]},
+ {cat:"Results", label:"Results", q:"Why did you compare your bacteriocins to nisin?", hints:["commercial bacteriocin","twice as effective as nisin","treated with Nisin (10 microg/ml)"]},
+ {cat:"Results", label:"Results", q:"What did the SDS-PAGE results tell you about your bacteriocins?", hints:["peptide bands were visualised","molecular weight approximately 11 kilodaltons","carried out after jury recommendation"]},
+ {cat:"Reflect", label:"Conclusion", q:"What is the potential real-world application of your findings?", hints:["domestic biotechnological raw material","cancer drugs, food preservatives","turned into products for different uses"]},
+ {cat:"Reflect", label:"Conclusion", q:"What makes this project unique compared to previous studies?", hints:["no previous study on this cheese","uniqueness of the project","investigated anti-cancer effects"]},
+ {cat:"Reflect", label:"Reflection", q:"What was the most challenging part of this project for you?", hints:["describe a method step","use: it was difficult to ...","use: at first, then, finally"]},
+ {cat:"Reflect", label:"Reflection", q:"What did you learn from doing this research?", hints:["use: I learned that ...","use: this project showed me ..."]}
+];
+var currentQ = null;
+var timerSeconds = 45;
+var timerInterval = null;
+var timerRunning = false;
+
+function pickQuestion(){
+  var q = questions[Math.floor(Math.random()*questions.length)];
+  if(currentQ && questions.length>1){
+    while(q.q===currentQ.q){ q = questions[Math.floor(Math.random()*questions.length)]; }
+  }
+  currentQ = q;
+  var tag = document.getElementById('q-cat');
+  tag.textContent = q.label;
+  tag.className = 'cat-tag cat-' + q.cat.toLowerCase();
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('hint-box').style.display = 'none';
+}
+
+function nextQuestion(){
+  resetTimer();
+  pickQuestion();
+}
+
+function toggleHint(){
+  var box = document.getElementById('hint-box');
+  if(!currentQ) return;
+  if(box.style.display==='none'){
+    var html = 'Try to use these in your answer:<ul>';
+    currentQ.hints.forEach(function(h){ html += '<li>'+h+'</li>'; });
+    html += '</ul>';
+    box.innerHTML = html;
+    box.style.display = 'block';
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function updateTimerDisplay(){
+  var m = Math.floor(timerSeconds/60);
+  var s = timerSeconds%60;
+  document.getElementById('timer-display').textContent = m+':'+(s<10?'0':'')+s;
+}
+
+function toggleTimer(){
+  if(!currentQ){ pickQuestion(); }
+  var btn = document.getElementById('start-btn');
+  if(timerRunning){
+    clearInterval(timerInterval);
+    timerRunning = false;
+    btn.textContent = 'Start';
+  } else {
+    timerRunning = true;
+    btn.textContent = 'Pause';
+    timerInterval = setInterval(function(){
+      timerSeconds--;
+      updateTimerDisplay();
+      if(timerSeconds<=0){
+        clearInterval(timerInterval);
+        timerRunning = false;
+        btn.textContent = 'Start';
+      }
+    }, 1000);
+  }
+}
+
+function resetTimer(){
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerSeconds = 45;
+  updateTimerDisplay();
+  document.getElementById('start-btn').textContent = 'Start';
+}
+
+initMatch();
+updateTimerDisplay();
+</script>
+</body>
+</html>
