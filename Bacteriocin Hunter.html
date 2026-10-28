@@ -1,0 +1,604 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Bacteriocin Hunter</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a virtual microbiology bench. Sticky role bar, a 5-stage stepper, one hands-on bench at a time (tool tray + stations), lab notebook underneath. Candy palette to match Battle Lab. */
+:root{
+  --bg:#eef6ff; --surface:#ffffff; --ink:#1f1a2e; --muted:#5f5a78; --line:#d9d6ea;
+  --sun:#ffc23d; --sky:#3ba7f5; --mint:#1fc49a; --coral:#ff6b5e; --grape:#8f5cf6; --pink:#ff4fa3;
+  --sun-s:#fff1c2; --sky-s:#dcefff; --mint-s:#d4f7ec; --coral-s:#ffe1dd; --grape-s:#ece3ff; --pink-s:#ffe0ef;
+  --on-c:#1f1a2e; --agar:#f7e6a3; --lawn:#c49a4a; --clear:#fdf6d8; --glass:#cfe6f7; --broth:#e9c46a; --metal:#b9c2d3;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141428; --surface:#1e1d38; --ink:#efeaf7; --muted:#a8a2c2; --line:#353356;
+  --sun:#ffd166; --sky:#5bb8ff; --mint:#3fe0b5; --coral:#ff8a7e; --grape:#b18bff; --pink:#ff74b8;
+  --sun-s:#3a3220; --sky-s:#1a2f4a; --mint-s:#163a33; --coral-s:#3f2226; --grape-s:#2c2350; --pink-s:#3f1f33;
+  --on-c:#141428; --agar:#5a4f2a; --lawn:#c9a45a; --clear:#7a6d3e; --glass:#2c4660; --broth:#b8973f; --metal:#4a5168; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141428; --surface:#1e1d38; --ink:#efeaf7; --muted:#a8a2c2; --line:#353356;
+  --sun:#ffd166; --sky:#5bb8ff; --mint:#3fe0b5; --coral:#ff8a7e; --grape:#b18bff; --pink:#ff74b8;
+  --sun-s:#3a3220; --sky-s:#1a2f4a; --mint-s:#163a33; --coral-s:#3f2226; --grape-s:#2c2350; --pink-s:#3f1f33;
+  --on-c:#141428; --agar:#5a4f2a; --lawn:#c9a45a; --clear:#7a6d3e; --glass:#2c4660; --broth:#b8973f; --metal:#4a5168; color-scheme:dark}
+*{box-sizing:border-box}
+body{color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;
+  background:radial-gradient(circle at 6% 3%,var(--mint-s) 0 170px,transparent 171px),radial-gradient(circle at 94% 10%,var(--pink-s) 0 200px,transparent 201px),radial-gradient(circle at 90% 75%,var(--sun-s) 0 220px,transparent 221px),radial-gradient(circle at 4% 60%,var(--sky-s) 0 180px,transparent 181px),var(--bg);background-attachment:fixed;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+header{padding-top:30px;display:grid;gap:10px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--grape)}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(36px,7vw,60px);line-height:1;margin:0;color:var(--grape)}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--mint),var(--sky),var(--grape));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{margin:0;max-width:66ch;color:var(--muted)}
+h2,h3{font-family:var(--display);margin:0;text-wrap:balance}
+:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
+button{font:inherit;color:inherit}
+.btn{font-weight:700;font-size:15px;padding:9px 16px;border-radius:10px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--grape)}
+.btn.go{background:var(--grape);border-color:var(--grape);color:#fff}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tag{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+
+.roles{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;border-bottom:3px solid var(--sun);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.who{display:flex;align-items:center;gap:10px;padding:6px 8px 6px 12px;border-radius:14px;border:3px solid var(--pc);background:var(--surface)}
+.who input{width:96px;border:0;background:transparent;font:700 15px var(--body);color:var(--ink)}
+.who .role{font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:999px;background:var(--pcs);white-space:nowrap}
+.who .pts{font-family:var(--mono);font-variant-numeric:tabular-nums;min-width:3ch;text-align:right}
+.who .plus{font:700 12px var(--body);padding:3px 7px;border-radius:7px;border:1.5px solid var(--pc);background:var(--surface);cursor:pointer}
+
+.stepper{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;list-style:none;margin:0;padding:0}
+.stepper li{padding:8px 10px;border-radius:12px;background:var(--surface);border:2px solid var(--line);font-size:14px;display:grid;gap:2px}
+.stepper li b{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.stepper li.now{border-color:var(--grape);background:var(--grape-s);box-shadow:3px 3px 0 var(--grape)}
+.stepper li.done{border-color:var(--mint);background:var(--mint-s)}
+
+.stage{background:var(--surface);border:3px solid var(--c);box-shadow:7px 7px 0 var(--c);border-radius:18px;padding:22px;display:grid;gap:18px}
+.stage-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.stage-head h2{background:var(--c);color:var(--on-c);padding:4px 16px;border-radius:999px;font-size:22px}
+.inst{margin:0;color:var(--muted);max-width:70ch}
+.two{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:start}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.card{text-align:left;padding:14px;border-radius:14px;border:3px solid transparent;background:var(--cs);cursor:pointer;display:grid;gap:6px}
+.card:hover{border-color:var(--c)}
+.card h3{font-size:19px}
+.card small{color:var(--muted)}
+.card .tr{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.badge.ok{background:var(--mint-s);border-color:var(--mint)}
+.blob{width:34px;height:34px;border-radius:50% 46% 52% 44%;background:var(--bc)}
+
+/* hands-on bench */
+.benchgrid{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:18px;align-items:start}
+.protocol{background:var(--sun-s);border-radius:14px;padding:16px;display:grid;gap:8px}
+.protocol h3{font-size:18px}
+.protocol ol{margin:0;padding-left:22px;display:grid;gap:6px;font-size:15.5px}
+.protocol li.did{text-decoration:line-through;color:var(--muted)}
+.protocol li.now{font-weight:700}
+.protocol li.now::marker{color:var(--grape)}
+.work{display:grid;gap:12px;min-width:0}
+.tray{display:flex;flex-wrap:wrap;gap:10px;padding:12px;border-radius:14px;background:var(--cs)}
+.tray-lbl{font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);width:100%}
+.it{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;display:grid;justify-items:center;gap:2px;padding:8px 6px;border-radius:12px;background:var(--surface);border:2px solid var(--line);width:100px;font-size:12.5px;font-weight:700;text-align:center;line-height:1.2}
+.it svg{width:58px;height:58px;pointer-events:none}
+.it:hover{border-color:var(--c)}
+.it.sel{border-color:var(--grape);box-shadow:0 0 0 4px var(--grape-s)}
+.it.trap{border-style:dashed}
+.it small{font-weight:400;color:var(--muted);font-size:11.5px}
+.stations{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.station{border:2.5px dashed var(--line);border-radius:14px;padding:10px;display:grid;gap:6px;justify-items:center;align-content:start;background:var(--surface);min-height:190px;text-align:center}
+.stations.st3{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+@media (max-width:560px){.stations.st3{grid-template-columns:1fr}}
+.station h4{margin:0;font-family:var(--display);font-size:16px}
+.station .note{font-size:12.5px;color:var(--muted)}
+.hot{border-color:var(--grape)!important;background:var(--grape-s)!important}
+.station .big{width:120px;height:120px}
+.station .it{width:auto;border-color:transparent;background:transparent}
+.station .it svg{width:100px;height:100px}
+.ctlrow{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap}
+.ctl{font:700 14px var(--body);min-width:34px;padding:5px 9px;border-radius:8px;border:2px solid var(--line);background:var(--bg);cursor:pointer}
+.ctl.go{background:var(--grape);border-color:var(--grape);color:#fff}
+.temp{font-family:var(--mono);font-size:20px;font-variant-numeric:tabular-nums;min-width:5.2ch;padding:2px 8px;border-radius:6px;background:var(--ink);color:var(--mint)}
+.clock{font-family:var(--mono);font-size:14px;color:var(--grape)}
+.ghost{position:fixed;left:0;top:0;pointer-events:none;z-index:60;width:70px;height:70px;transform:translate(-50%,-50%) rotate(-8deg);filter:drop-shadow(0 6px 10px rgba(0,0,0,.25))}
+.ghost svg{width:70px;height:70px}
+.msg{padding:10px 14px;border-radius:10px;font-size:15.5px;font-weight:700;min-height:44px}
+.msg.ok{background:var(--mint-s)} .msg.no{background:var(--coral-s)} .msg.info{background:var(--sky-s)}
+.hint{font-size:13.5px;color:var(--muted)}
+.preds{display:grid;gap:6px;padding:12px;border-radius:12px;background:var(--grape-s)}
+.preds label{display:flex;gap:8px;align-items:center;font-size:15px}
+.preds input{width:18px;height:18px;accent-color:var(--grape)}
+
+.wells{display:grid;gap:8px}
+.well{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--cs);border:2px solid transparent;text-align:left;cursor:pointer}
+.well.sel{border-color:var(--c);background:var(--surface);box-shadow:3px 3px 0 var(--c)}
+.well.rec{background:var(--mint-s)}
+.well .num{font-family:var(--mono);font-weight:700;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:2px solid var(--ink)}
+.well small{color:var(--muted);display:block}
+.it .dish{pointer-events:auto}
+.station .it svg.dish{width:min(260px,100%);height:auto}
+.dishbox{display:grid;gap:10px;justify-items:center}
+.dish{width:100%;max-width:380px;aspect-ratio:1}
+.measure{display:grid;gap:10px;padding:14px;border-radius:14px;background:var(--grape-s)}
+.measure input[type=range]{width:100%;accent-color:var(--grape)}
+.mm{font-family:var(--mono);font-size:30px;font-variant-numeric:tabular-nums}
+.say{border-top:2px dashed var(--line);padding-top:16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.say div{padding:12px 14px;border-radius:12px;background:var(--pink-s);display:grid;gap:4px}
+.say div:last-child{background:var(--sky-s)}
+.say b{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.say p{margin:0}
+.say i{color:var(--muted)}
+.q{display:grid;gap:8px}
+.q h3{font-size:19px}
+.opt{padding:11px 14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);text-align:left;cursor:pointer;font-size:16px}
+.opt:hover{border-color:var(--c)}
+.opt.right{background:var(--mint-s);border-color:var(--mint)}
+.opt.wrong{background:var(--coral-s);border-color:var(--coral)}
+.fb{padding:10px 14px;border-radius:10px;font-size:15.5px}
+.fb.ok{background:var(--mint-s)} .fb.no{background:var(--coral-s)}
+.toast{min-height:24px;font-weight:700}
+.toast.ok{color:var(--mint)} .toast.no{color:var(--coral)}
+
+.notebook{background:var(--surface);border-radius:18px;border:3px solid var(--sky);padding:20px;display:grid;gap:12px;background-image:repeating-linear-gradient(transparent 0 31px,var(--sky-s) 31px 32px)}
+.notebook h2{font-size:24px;color:var(--sky)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:15px;background:var(--surface)}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.verdict{font-size:13px;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.v-bac{background:var(--mint-s);border:1px solid var(--mint)} .v-acid{background:var(--sun-s);border:1px solid var(--sun)} .v-none{background:var(--bg);border:1px solid var(--line)}
+footer{font-size:13px;color:var(--muted)}
+
+/* svg classes */
+.s-agar{fill:var(--agar)} .s-rim{fill:none;stroke:var(--muted);stroke-width:3}
+.s-lawn{fill:var(--lawn)} .s-clear{fill:var(--clear)}
+.s-well{fill:var(--bg);stroke:var(--ink);stroke-width:1.5}
+.s-wellf{fill:var(--sky-s);stroke:var(--sky);stroke-width:3}
+.s-lbl{fill:var(--ink);font-family:var(--mono);font-size:13px;font-weight:700}
+.s-sel{fill:none;stroke:var(--grape);stroke-width:3}
+.s-meas{fill:none;stroke:var(--pink);stroke-width:2.5;stroke-dasharray:5 4}
+.s-glass{fill:var(--glass);stroke:var(--muted);stroke-width:2}
+.s-broth{fill:var(--broth)} .s-ink{fill:var(--ink)} .s-muted{fill:var(--muted)} .s-metal{fill:var(--metal);stroke:var(--muted);stroke-width:2}
+.s-col{fill:var(--grape)} .s-streak{fill:none;stroke:var(--lawn);stroke-width:4;stroke-linecap:round}
+.s-line{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.s-surf{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+.spin{animation:spin .5s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+.grow{animation:grow 1.4s ease-out both}
+@keyframes grow{from{transform:scale(0)}}
+.wobble{animation:wob .4s ease-in-out infinite alternate}
+@keyframes wob{to{transform:translateY(-2px)}}
+.confetti{position:fixed;top:-12px;width:10px;height:14px;z-index:50;pointer-events:none;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+@media (max-width:760px){.two,.say,.benchgrid{grid-template-columns:1fr}.stepper li span{display:none}}
+@media (max-width:480px){.cards{grid-template-columns:1fr}.it{width:88px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">Virtual lab · based on Garcia-Gutierrez &amp; Arbulu, Frontiers for Young Minds (2021)</span>
+  <h1>Bacteriocin <em>Hunter</em></h1>
+  <p class="lede">Hunt for bacteriocin-producing bacteria in four samples. The <b>Operator</b> does the lab work: drag tools onto the equipment (or click a tool, then click where it goes). The <b>Instructor</b> reads the protocol aloud and asks the questions. Roles swap at every stage.</p>
+</header>
+
+<div class="roles" aria-label="Scientists">
+  <div class="who" style="--pc:var(--sky);--pcs:var(--sky-s)"><input id="n0" value="Scientist A" aria-label="Scientist 1 name"><span class="role" id="r0"></span><span class="pts" id="p0">0</span><button class="plus" data-pl="0" data-v="5">+5</button><button class="plus" data-pl="0" data-v="10">+10</button></div>
+  <div class="who" style="--pc:var(--pink);--pcs:var(--pink-s)"><input id="n1" value="Scientist B" aria-label="Scientist 2 name"><span class="role" id="r1"></span><span class="pts" id="p1">0</span><button class="plus" data-pl="1" data-v="5">+5</button><button class="plus" data-pl="1" data-v="10">+10</button></div>
+  <button class="btn" id="swap">Swap roles</button>
+  <span class="tag">Teacher: award points for good English.</span>
+</div>
+
+<ol class="stepper" id="stepper">
+  <li><b>01</b>Collect<span> a sample</span></li>
+  <li><b>02</b>Grow<span> &amp; spin</span></li>
+  <li><b>03</b>Test<span> on a plate</span></li>
+  <li><b>04</b>Measure<span> the zones</span></li>
+  <li><b>05</b>Conclude</li>
+</ol>
+
+<section class="stage" id="stage" aria-live="polite"></section>
+
+<section class="notebook" aria-labelledby="nbh">
+  <div class="row"><h2 id="nbh">Lab notebook</h2><span class="tag" id="nbcount">0 / 8 tests</span></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Sample</th><th>Indicator</th><th>Well 1 (mm)</th><th>Well 2 (mm)</th><th>Well 3 (mm)</th><th>Well 4 (mm)</th><th>Verdict</th></tr></thead>
+    <tbody id="nb"><tr><td colspan="7" style="color:var(--muted)">No tests yet. Your measurements will appear here.</td></tr></tbody>
+  </table></div>
+  <span class="tag">Zone diameter includes the 6 mm well. “–” means no clear zone.</span>
+</section>
+
+<footer>Experiment design: agar well diffusion assay, the method scientists use to screen for bacteriocins. Results are simulated for teaching. Article: Garcia-Gutierrez E, Arbulu S (2021). Front. Young Minds 8:558681.</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const SAMPLES={
+  tc:{name:'Tulum cheese',tr:'Tulum peyniri',desc:'Traditional cheese ripened in a goatskin bag.',bc:'var(--sun)',data:{lis:[19,17,0,0],eco:[10,0,0,0]}},
+  yo:{name:'Homemade yogurt',tr:'Ev yoğurdu',desc:'Fermented milk full of lactic acid bacteria.',bc:'var(--sky)',data:{lis:[13,0,0,0],eco:[12,0,0,0]}},
+  pk:{name:'Pickle brine',tr:'Turşu suyu',desc:'Salty, sour liquid from fermented vegetables.',bc:'var(--mint)',data:{lis:[16,15,0,0],eco:[9,0,0,0]}},
+  so:{name:'Garden soil',tr:'Bahçe toprağı',desc:'A crowded neighborhood of microbes.',bc:'var(--coral)',data:{lis:[0,0,0,0],eco:[0,0,0,0]}}
+};
+const INDS={
+  lis:{name:'Listeria innocua',short:'Listeria',gram:'Gram-positive',note:'Thick wall, like a strong medieval town wall. A safe cousin of a food-poisoning bacterium.'},
+  eco:{name:'Escherichia coli',short:'E. coli',gram:'Gram-negative',note:'Thin wall, plus an extra outer membrane that protects it.'}
+};
+const WELLS=[
+  {t:'Tube A: supernatant, as it is',s:'Everything the bacteria released: acid, hydrogen peroxide and proteins.'},
+  {t:'Tube B: + NaOH + catalase',s:'Acid neutralised (pH 7) and hydrogen peroxide destroyed.'},
+  {t:'Tube C: + NaOH + catalase + protease',s:'Protease is an enzyme that cuts up proteins.'},
+  {t:'Broth only (control)',s:'Clean growth liquid. Nothing should happen here.'}
+];
+const WPOS=[[95,95],[205,95],[95,205],[205,205]];
+
+let st={stage:1,sample:null,ind:null,incubated:false,meas:[null,null,null,null],sel:0,pred:[false,false,false,false],grown:{},g:null,t:null,msg:null};
+let records={},op=0,pts=[0,0],lawnDots=[],held=null,busy=false;
+
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const verdict=(s,i)=>{const d=SAMPLES[s].data[i];return d[1]>0&&d[2]===0?'bac':d[0]>0?'acid':'none'};
+const VTXT={bac:'Bacteriocin',acid:'Acid / H₂O₂ only',none:'No activity'};
+const name=i=>$('#n'+i).value||('Scientist '+(i?'B':'A'));
+const opName=()=>name(op),insName=()=>name(1-op);
+const reduce=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+function say(ins,opr){return `<div class="say"><div><b>${insName()} · Instructor says</b>${ins}</div><div><b>${opName()} · Operator says</b>${opr}</div></div>`}
+function setMsg(t,k){st.msg={t,k:k||'info'}}
+const msgHTML=()=>`<div class="msg ${st.msg?st.msg.k:'info'}" id="msg">${st.msg?st.msg.t:'Drag a tool onto the equipment, or click a tool and then click where it goes.'}</div>`;
+
+function confetti(){
+  if(reduce())return;
+  const cs=getComputedStyle(document.documentElement),cols=['--sun','--sky','--mint','--coral','--grape','--pink'].map(n=>cs.getPropertyValue(n).trim());
+  for(let i=0;i<80;i++){const d=document.createElement('div');d.className='confetti';d.style.left=Math.random()*100+'vw';d.style.background=cols[i%6];d.style.animationDuration=(1.6+Math.random()*1.6)+'s';d.style.animationDelay=Math.random()*.4+'s';document.body.append(d);setTimeout(()=>d.remove(),3800)}
+}
+function renderRoles(){[0,1].forEach(i=>{$('#r'+i).textContent=i===op?'Operator':'Instructor';$('#p'+i).textContent=pts[i]})}
+$('#swap').onclick=()=>{op=1-op;renderRoles();renderStage()};
+['n0','n1'].forEach(id=>$('#'+id).addEventListener('change',()=>renderStage()));
+document.querySelectorAll('.plus').forEach(b=>b.onclick=()=>{const p=+b.dataset.pl,v=+b.dataset.v;pts[p]+=v;renderRoles();if(v===10)confetti()});
+function go(n){if(n!==st.stage){op=1-op;renderRoles()}st.stage=n;st.msg=null;held=null;renderStage();$('#stage').scrollIntoView({behavior:reduce()?'auto':'smooth',block:'start'})}
+function stepper(){[...$('#stepper').children].forEach((li,i)=>{li.className=i+1===st.stage?'now':i+1<st.stage?'done':''})}
+const STAGECOL=['','sun','sky','mint','grape','pink'];
+
+/* ---------- icons (64x64) ---------- */
+const IC={
+  jar:c=>`<svg viewBox="0 0 64 64"><rect x="14" y="22" width="30" height="36" rx="6" class="s-glass"/><rect x="17" y="36" width="24" height="19" rx="4" style="fill:${c}"/><rect x="12" y="15" width="34" height="9" rx="3" class="s-muted"/><line x1="54" y1="4" x2="38" y2="44" class="s-line"/><ellipse cx="37" cy="46" rx="4" ry="6" class="s-surf" transform="rotate(22 37 46)"/></svg>`,
+  loop:l=>`<svg viewBox="0 0 64 64"><rect x="4" y="46" width="22" height="8" rx="4" transform="rotate(-40 15 50)" class="s-muted"/><line x1="18" y1="44" x2="46" y2="18" class="s-line" stroke-width="2"/><circle cx="50" cy="14" r="7" fill="none" stroke="var(--ink)" stroke-width="2.5"/>${l?'<circle cx="50" cy="14" r="4" class="s-col"/>':''}</svg>`,
+  tube:(s,lbl)=>{const fill={fresh:'var(--clear)',inoc:'var(--clear)',cloudy:'var(--broth)',spun:'var(--clear)',super:'var(--clear)',plain:'var(--clear)'}[s]||'var(--clear)';
+    return `<svg viewBox="0 0 64 64"><path d="M22 6 v42 a10 10 0 0 0 20 0 v-42 z" class="s-glass"/><path d="M23.5 22 v26 a8.5 8.5 0 0 0 17 0 v-26 z" style="fill:${fill}"/>${s==='inoc'?'<circle cx="32" cy="40" r="3" class="s-col"/>':''}${s==='cloudy'?'<g class="s-col" opacity=".55"><circle cx="28" cy="30" r="1.6"/><circle cx="35" cy="36" r="1.6"/><circle cx="30" cy="44" r="1.6"/><circle cx="36" cy="27" r="1.6"/></g>':''}${s==='spun'?'<ellipse cx="32" cy="53" rx="6" ry="3" class="s-col"/>':''}<rect x="19" y="3" width="26" height="7" rx="2" class="s-muted"/>${lbl?`<text x="32" y="36" text-anchor="middle" class="s-lbl" font-size="15">${lbl}</text>`:''}</svg>`},
+  bottle:(c,txt)=>`<svg viewBox="0 0 64 64"><rect x="24" y="4" width="16" height="10" rx="2" class="s-muted"/><path d="M22 14 h20 l6 10 v30 a6 6 0 0 1 -6 6 h-20 a6 6 0 0 1 -6 -6 v-30 z" class="s-glass"/><rect x="18" y="30" width="28" height="18" rx="3" style="fill:${c}"/><text x="32" y="44" text-anchor="middle" class="s-lbl" font-size="11">${txt}</text></svg>`,
+  dropper:(c,txt)=>`<svg viewBox="0 0 64 64"><rect x="26" y="2" width="12" height="14" rx="5" style="fill:${c}"/><rect x="22" y="15" width="20" height="5" rx="2" class="s-muted"/><path d="M27 20 h10 v22 l-5 10 l-5 -10 z" class="s-glass"/><path d="M32 56 q-4 4 0 6 q4 -2 0 -6" style="fill:${c}"/><text x="50" y="40" text-anchor="middle" class="s-lbl" font-size="10">${txt}</text></svg>`,
+  heat:()=>`<svg viewBox="0 0 64 64"><rect x="6" y="34" width="52" height="22" rx="5" class="s-metal"/><rect x="10" y="28" width="44" height="8" rx="2" style="fill:var(--coral)"/><path d="M18 22 q-4 -6 0 -12 M32 22 q-4 -6 0 -12 M46 22 q-4 -6 0 -12" fill="none" stroke="var(--coral)" stroke-width="3" stroke-linecap="round"/><text x="32" y="50" text-anchor="middle" class="s-lbl" font-size="11">100°C</text></svg>`,
+  plate:(s,c)=>{let x=`<svg viewBox="0 0 64 64"><ellipse cx="32" cy="34" rx="28" ry="22" class="s-agar"/><ellipse cx="32" cy="34" rx="28" ry="22" class="s-rim" stroke-width="2"/>`;
+    if(s==='streaked'||s==='colonies')x+=`<path d="M14 28 q8 -8 16 0 t16 0 M16 40 q8 -7 15 0 t15 0" class="s-streak" stroke-width="2.5" opacity="${s==='streaked'?.9:.3}"/>`;
+    if(s==='colonies'||s==='picked')[[16,28],[24,23],[33,28],[42,24],[49,29],[18,40],[27,37],[37,41],[46,38]].forEach(([a,b],i)=>{if(!(s==='picked'&&i===2))x+=`<circle cx="${a}" cy="${b}" r="3.2" class="s-col"/>`});
+    if(s==='lawn')x+=`<ellipse cx="32" cy="34" rx="25" ry="19" class="s-lawn" opacity=".35"/>`;
+    return x+'</svg>'},
+  filter:()=>`<svg viewBox="0 0 64 64"><path d="M10 8 h44 l-16 22 v8 h-12 v-8 z" class="s-glass"/><path d="M14 10 h36 l-3 4 h-30 z" class="s-muted"/><path d="M24 40 v14 a8 8 0 0 0 16 0 v-14 z" class="s-glass"/></svg>`,
+  inc:(inner,run)=>`<svg viewBox="0 0 120 120" class="big"><rect x="6" y="6" width="108" height="108" rx="12" class="s-metal"/><rect x="18" y="18" width="84" height="70" rx="6" style="fill:var(--sun-s)" stroke="var(--muted)" stroke-width="2"/>${run?'<rect x="18" y="18" width="84" height="70" rx="6" fill="var(--coral)" opacity=".18"/>':''}<g transform="translate(36 22) scale(.75)">${inner||''}</g><circle cx="100" cy="102" r="5" style="fill:${run?'var(--mint)':'var(--muted)'}"/></svg>`,
+  cent:(has,spin)=>`<svg viewBox="0 0 120 120" class="big"><rect x="8" y="30" width="104" height="80" rx="14" class="s-metal"/><circle cx="60" cy="62" r="40" class="s-surf"/><g class="${spin?'spin':''}"><circle cx="60" cy="62" r="30" class="s-glass"/>${[0,90,180,270].map(a=>`<circle cx="${60+20*Math.cos(a*Math.PI/180)}" cy="${62+20*Math.sin(a*Math.PI/180)}" r="6" style="fill:${has&&a===0?'var(--broth)':'var(--bg)'}" stroke="var(--muted)" stroke-width="1.5"/>`).join('')}<circle cx="60" cy="62" r="5" class="s-muted"/></g></svg>`
+};
+
+/* ---------- drag & drop engine ---------- */
+let drag=null,ghost=null,lastHot=null;
+function dropIdAt(x,y){const el=document.elementFromPoint(x,y);const d=el&&el.closest('[data-drop]');return d?d.dataset.drop:null}
+function hot(x,y){const el=document.elementFromPoint(x,y);const d=el&&el.closest('[data-drop]');if(lastHot&&lastHot!==d)lastHot.classList.remove('hot');if(d&&drag&&d.dataset.drop!==drag.id){d.classList.add('hot');lastHot=d}}
+document.addEventListener('pointerdown',e=>{
+  if(busy)return;const it=e.target.closest('.it[data-id]');if(!it||!$('#stage').contains(it))return;
+  e.preventDefault();drag={id:it.dataset.id,x:e.clientX,y:e.clientY,el:it,moved:false};
+});
+document.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6){drag.moved=true;ghost=document.createElement('div');ghost.className='ghost';ghost.innerHTML=drag.el.querySelector('svg').outerHTML;document.body.append(ghost)}
+  if(drag.moved){ghost.style.left=e.clientX+'px';ghost.style.top=e.clientY+'px';hot(e.clientX,e.clientY)}
+});
+document.addEventListener('pointerup',e=>{
+  if(!drag)return;const d=drag;drag=null;
+  if(ghost){ghost.remove();ghost=null}if(lastHot){lastHot.classList.remove('hot');lastHot=null}
+  const target=dropIdAt(e.clientX,e.clientY);
+  if(d.moved){if(target&&target!==d.id)act(d.id,target)}
+  else{ if(held&&target&&target!==held){const h=held;held=null;act(h,target)} else {held=held===d.id?null:d.id;markHeld()} }
+});
+document.addEventListener('click',e=>{
+  if(busy||!held)return;if(e.target.closest('.ctl')||e.target.closest('.it'))return;
+  const d=e.target.closest('[data-drop]');if(d&&$('#stage').contains(d)){const h=held;held=null;act(h,d.dataset.drop)}
+});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const it=e.target.closest&&e.target.closest('.it[data-id]');if(!it||busy)return;e.preventDefault();const id=it.dataset.id;if(held&&held!==id){const h=held;held=null;act(h,id)}else{held=held===id?null:id;markHeld()}});
+function markHeld(){document.querySelectorAll('.it[data-id]').forEach(x=>x.classList.toggle('sel',x.dataset.id===held));if(held){const n=document.querySelector(`.it[data-id="${held}"] b`);setMsg(`Holding: ${n?n.textContent:held}. Now click where it goes.`,'info');const m=$('#msg');if(m){m.className='msg info';m.textContent=st.msg.t}}}
+function act(item,target){if(target==='bench'&&item!=='plate'){markHeld();return}if(st.stage===2)growAct(item,target);else if(st.stage===3)testAct(item,target);renderStage()}
+const itm=(id,svg,label,sub,extra)=>`<div class="it ${extra||''}" data-id="${id}" data-drop="${id}" role="button" tabindex="0">${svg}<b>${label}</b>${sub?`<small>${sub}</small>`:''}</div>`;
+
+/* ---------- incubator & timers ---------- */
+function runIncubator(hours,done){
+  busy=true;let h=0;const step=Math.max(1,Math.round(hours/24));
+  const tick=()=>{h=Math.min(hours,h+step);const c=$('#clock');if(c)c.textContent=h+' h';if(h>=hours){clearInterval(iv);busy=false;done()}};
+  const iv=setInterval(tick,reduce()?20:70);renderStage();
+}
+function tempCheck(t){if(t<25)return `${t} °C is too cold! The bacteria will grow very slowly. Lactic acid bacteria like 30–37 °C.`;if(t>40)return `${t} °C is too hot! Most of the bacteria would die. Try 30–37 °C.`;return null}
+
+/* ---------- Stage 1 ---------- */
+function s1(){
+  const cards=Object.entries(SAMPLES).map(([k,v])=>{
+    const b=['lis','eco'].map(i=>`<span class="badge ${records[k+'-'+i]?'ok':''}">${INDS[i].short} ${records[k+'-'+i]?'tested':'not tested'}</span>`).join('');
+    return `<button class="card" data-s="${k}"><div class="row"><span class="blob" style="--bc:${v.bc}"></span><div><h3>${v.name}</h3><span class="tr">${v.tr}</span></div></div><small>${v.desc}</small><div class="badges">${b}</div></button>`}).join('');
+  return `<div class="stage-head"><h2>1 · Collect a sample</h2><span class="tag">Where do bacteriocin producers live?</span></div>
+  <p class="inst">Lactic acid bacteria are famous bacteriocin producers. They live in fermented foods. Choose a sample to hunt in. You can come back and test all four.</p>
+  <div class="cards">${cards}</div>
+  ${say('<p>“Which sample do you want to test first? Why?”</p><p><i>Then: “Do you think we will find a bacteriocin there?”</i></p>','<p>“I want to test the ___ because I think ___ bacteria live there.”</p><p><i>“I predict that we will / won’t find a bacteriocin because…”</i></p>')}`;
+}
+function bind1(){document.querySelectorAll('.card[data-s]').forEach(c=>c.onclick=()=>{
+  st.sample=c.dataset.s;st.ind=null;
+  if(st.grown[st.sample])go(3);else{st.g={plate:{loc:'bench',s:'empty'},tube:{loc:'bench',s:'fresh'},loop:false,temp:20,run:false,spin:false};go(2)}})}
+
+/* ---------- Stage 2: grow (hands-on) ---------- */
+const GSTEPS=['Dip the swab in the sample and streak it on the MRS agar plate.','Put the plate in the incubator. Set 30 °C and press Start (48 hours).','Touch one single colony with the loop.','Put the loop into the tube of MRS broth.','Put the tube in the incubator. Set 30 °C and press Start (overnight).','Put the tube in the centrifuge and press Spin.','Pour the tube through the filter. Keep the clear liquid: the cell-free supernatant.'];
+function gStep(g){if(g.plate.s==='empty')return 0;if(g.plate.s==='streaked')return 1;if(g.tube.s==='fresh'&&!g.loop)return 2;if(g.tube.s==='fresh')return 3;if(g.tube.s==='inoc')return 4;if(g.tube.s==='cloudy')return 5;if(g.tube.s==='spun')return 6;return 7}
+function growAct(item,target){
+  const g=st.g,k=gStep(g);
+  if(item==='ab'||target==='ab'){setMsg('Stop! An antibiotic would kill the bacteria we want to grow. Instructor, ask: “Why is this a bad idea?”','no');return}
+  if(item==='heat'||target==='heat'){setMsg('Ouch! 100 °C would kill the bacteria and destroy their proteins. Instructor, ask: “What would happen to our bacteriocin?”','no');return}
+  if(item==='jar'&&target==='plate'){if(k===0){g.plate.s='streaked';setMsg('Nice streak! Now the bacteria need a warm place to grow.','ok')}else setMsg('The plate is already streaked.','info');return}
+  if(item==='plate'&&target==='inc'){if(k===1){g.plate.loc='inc';setMsg('Plate is inside. Set the temperature and press Start.','info')}else setMsg('The plate does not need the incubator now. Check the protocol.','no');return}
+  if(item==='loop'&&target==='plate'){if(k===2&&g.plate.loc==='bench'){g.loop=true;g.plate.s='picked';setMsg('You picked one colony. One colony = one type of bacterium.','ok')}else if(k<2)setMsg('There are no colonies yet. Grow them first!','no');else setMsg('You already have your colony.','info');return}
+  if(item==='loop'&&target==='tube'){if(k===3){g.loop=false;g.tube.s='inoc';setMsg('The colony is in the broth. Now it needs to grow.','ok')}else setMsg('Pick a colony with the loop first.','no');return}
+  if(item==='tube'&&target==='inc'){if(k===4){g.tube.loc='inc';setMsg('Tube is inside. Set the temperature and press Start.','info')}else if(k<4)setMsg('The tube is empty! Put a colony in it first.','no');else setMsg('The tube has already grown.','info');return}
+  if(item==='tube'&&target==='cent'){if(k===5){g.tube.loc='cent';setMsg('Tube is in the centrifuge. Close the lid and press Spin!','info')}else setMsg(k<5?'Not yet. Grow the bacteria in the tube first.':'The tube is already spun.','no');return}
+  if(item==='tube'&&target==='filter'){if(k===6){g.tube.s='super';g.tube.loc='bench';st.grown[st.sample]=true;setMsg('Cell-free supernatant ready! If this sample has bacteriocins, they are in this liquid now.','ok');confetti()}else setMsg(k<6?'Spin the tube in the centrifuge first.':'Already filtered.','no');return}
+  setMsg(`That doesn't go there. Instructor, read step ${Math.min(k+1,7)} again.`,'no');
+}
+function s2(){
+  const S=SAMPLES[st.sample],g=st.g,k=gStep(g);
+  const steps=GSTEPS.map((x,i)=>`<li class="${i<k?'did':i===k?'now':''}">${x}</li>`).join('');
+  const plateIc=IC.plate(g.plate.s),tubeIc=IC.tube(g.tube.s);
+  const incInner=g.plate.loc==='inc'?plateIc.replace('<svg viewBox="0 0 64 64">','<svg viewBox="0 0 64 64" width="64" height="64">'):g.tube.loc==='inc'?tubeIc.replace('<svg viewBox="0 0 64 64">','<svg viewBox="0 0 64 64" width="64" height="64">'):'';
+  const tray=[
+    itm('jar',IC.jar(S.bc),'Sample swab',S.name),
+    itm('loop',IC.loop(g.loop),'Loop',g.loop?'has a colony':'sterile'),
+    g.plate.loc==='bench'?itm('plate',plateIc,'MRS agar plate',{empty:'empty',streaked:'streaked',colonies:'colonies!',picked:'colonies'}[g.plate.s]):'',
+    g.tube.loc==='bench'?itm('tube',tubeIc,'MRS broth tube',{fresh:'clean broth',inoc:'has a colony',cloudy:'cloudy',spun:'spun',super:'supernatant'}[g.tube.s]):'',
+    itm('ab',IC.bottle('var(--coral-s)','AB'),'Antibiotic','','trap'),
+    itm('heat',IC.heat(),'Heat block','100 °C','trap')
+  ].join('');
+  const done=k>=7;
+  return `<div class="stage-head"><h2>2 · Grow &amp; spin</h2><span class="tag">Sample: ${S.name}</span></div>
+  <p class="inst"><b>${insName()}</b> reads each step aloud. <b>${opName()}</b> does it with the tools. Careful: two tools on the bench are traps!</p>
+  <div class="benchgrid">
+    <div class="protocol"><h3>Protocol · read aloud</h3><ol>${steps}</ol></div>
+    <div class="work">
+      <div class="tray" data-drop="bench"><span class="tray-lbl">Bench · tools</span>${tray}</div>
+      <div class="stations">
+        <div class="station" data-drop="inc"><h4>Incubator</h4>${IC.inc(incInner,g.run)}
+          <div class="ctlrow"><button class="ctl" data-c="tm">−</button><span class="temp">${g.temp} °C</span><button class="ctl" data-c="tp">+</button></div>
+          <div class="ctlrow"><button class="ctl go" data-c="start" ${g.run?'disabled':''}>Start</button><span class="clock" id="clock">${g.run?'0 h':''}</span></div></div>
+        <div class="station" data-drop="cent"><h4>Centrifuge</h4>${IC.cent(g.tube.loc==='cent',g.spin)}
+          <div class="ctlrow"><button class="ctl go" data-c="spin" ${g.spin?'disabled':''}>Spin</button></div><span class="note">${g.spin?'Spinning at 10,000 rpm…':''}</span></div>
+        <div class="station" data-drop="filter"><h4>Filter</h4><div style="width:100px">${IC.filter()}</div><span class="note">Removes every cell. Only liquid passes.</span></div>
+      </div>
+      ${msgHTML()}
+      ${done?'<div class="row"><span class="hint">In the article, scientists recover bacteriocins with strainers and magnets. We used a centrifuge and a filter.</span><button class="btn go" id="next2">Go to the test plate</button></div>':''}
+    </div>
+  </div>
+  ${say('<p>“First, … Then, … Next, … After that, … Finally, …”</p><p><i>“What temperature should we use? Why?”</i></p>','<p>Think aloud while you work: “OK. Now I’m streaking the sample on the plate.”</p><p><i>Present continuous: I’m picking… I’m spinning… I’m setting the temperature to…</i></p>')}`;
+}
+function bind2(){
+  const g=st.g;
+  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=e=>{
+    e.stopPropagation();if(busy)return;const c=b.dataset.c;
+    if(c==='tm'){g.temp=Math.max(0,g.temp-5);renderStage()}
+    if(c==='tp'){g.temp=Math.min(100,g.temp+5);renderStage()}
+    if(c==='start'){
+      const inPlate=g.plate.loc==='inc',inTube=g.tube.loc==='inc';
+      if(!inPlate&&!inTube){setMsg('The incubator is empty. What do you need to put inside?','no');renderStage();return}
+      const bad=tempCheck(g.temp);if(bad){setMsg(bad,'no');renderStage();return}
+      g.run=true;setMsg(`Incubating at ${g.temp} °C… watch the clock!`,'info');
+      runIncubator(inPlate?48:24,()=>{g.run=false;if(inPlate){g.plate.loc='bench';g.plate.s='colonies';setMsg('48 hours later: colonies! Each dot is millions of bacteria.','ok')}else{g.tube.loc='bench';g.tube.s='cloudy';setMsg('Overnight growth: the broth is cloudy with millions of cells.','ok')}renderStage()});
+    }
+    if(c==='spin'){
+      if(g.tube.loc!=='cent'){setMsg('The centrifuge is empty. What should go inside?','no');renderStage();return}
+      g.spin=true;busy=true;setMsg('Spinning… the heavy cells sink to the bottom.','info');renderStage();
+      setTimeout(()=>{g.spin=false;busy=false;g.tube.loc='bench';g.tube.s='spun';setMsg('Done! The cells are a pellet at the bottom. The liquid on top is clear.','ok');renderStage()},reduce()?200:2200);
+    }
+  });
+  const n=$('#next2');if(n)n.onclick=()=>go(3);
+}
+
+/* ---------- dish ---------- */
+function makeDots(){let seed=7;const r=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};lawnDots=[];while(lawnDots.length<900){const x=20+r()*260,y=20+r()*260;if((x-150)**2+(y-150)**2<128**2)lawnDots.push([x,y,0.8+r()*1.6])}}
+function dishSVG(o){
+  o=o||{};const d=st.ind?SAMPLES[st.sample].data[st.ind]:[0,0,0,0];
+  const lawn=o.lawn===undefined?(st.incubated?.85:.25):o.lawn;
+  let s=`<svg class="dish" viewBox="0 0 300 300" role="img" aria-label="Petri dish with four wells"><circle cx="150" cy="150" r="135" class="s-agar"/>`;
+  if(lawn>0)s+=lawnDots.map(([x,y,r])=>`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" class="s-lawn" opacity="${lawn}"/>`).join('');
+  if(st.incubated)d.forEach((mm,i)=>{if(mm>0){const [x,y]=WPOS[i];s+=`<circle class="s-clear ${o.anim?'grow':''}" style="transform-origin:${x}px ${y}px" cx="${x}" cy="${y}" r="${mm*1.5}"/>`}});
+  s+=`<circle cx="150" cy="150" r="135" class="s-rim"/>`;
+  WPOS.forEach(([x,y],i)=>{const f=o.filled&&o.filled[i];s+=`<g data-drop="w${i}" style="cursor:pointer"><circle cx="${x}" cy="${y}" r="${o.drop?16:9}" fill="transparent"/><circle cx="${x}" cy="${y}" r="${o.drop?13:9}" class="${f?'s-wellf':'s-well'}" data-w="${i}"/><text x="${x}" y="${y+4.5}" text-anchor="middle" class="s-lbl" style="pointer-events:none">${i+1}</text></g>`});
+  if(o.measure){const [x,y]=WPOS[st.sel];s+=`<circle cx="${x}" cy="${y}" r="13" class="s-sel"/>`;const v=+(o.val||0);if(v>0)s+=`<circle cx="${x}" cy="${y}" r="${v*1.5}" class="s-meas"/>`}
+  return s+`<text x="150" y="292" text-anchor="middle" class="s-lbl" font-size="11">${lawn>0&&st.ind?INDS[st.ind].short+' lawn':'empty plate'}</text></svg>`;
+}
+
+/* ---------- Stage 3: test (hands-on) ---------- */
+const TSTEPS=['Pour the indicator bacteria onto the plate to make a lawn.','Tube B: add NaOH (to pH 7) and catalase.','Tube C: add NaOH, catalase and protease.','Pipette each tube into its well: A → 1, B → 2, C → 3, broth → 4.','Tick your predictions. Put the plate in the incubator at 37 °C and press Start.'];
+const RNAME={naoh:'NaOH',cat:'catalase',pro:'protease'};
+function tStep(t){if(!t.lawn)return 0;if(!(t.B.includes('naoh')&&t.B.includes('cat')))return 1;if(t.C.length<3)return 2;if(t.wells.some(w=>!w))return 3;if(!st.incubated)return 4;return 5}
+function testAct(item,target){
+  const t=st.t;const reag=['naoh','cat','pro'];
+  if(item==='ind'&&target==='plate'){if(t.lawn)setMsg('The lawn is already there.','info');else{t.lawn=true;setMsg(`A thin lawn of ${INDS[st.ind].short} now covers the plate. Soon it will grow everywhere… unless something stops it!`,'ok')}return}
+  if(reag.includes(item)){
+    if(target==='tA'){setMsg('Tube A must stay as it is. It shows everything the bacteria made.','no');return}
+    if(target==='tB'||target==='tC'){const arr=t[target[1]];
+      if(target==='tB'&&item==='pro'){setMsg('No protease in tube B! We need tubes B and C to be different. Instructor, ask: “Why?”','no');return}
+      if(arr.includes(item)){setMsg(`Tube ${target[1]} already has ${RNAME[item]}.`,'info');return}
+      arr.push(item);setMsg(`${RNAME[item][0].toUpperCase()+RNAME[item].slice(1)} added to tube ${target[1]}.`,'ok');return}
+    if(target==='plate'||/^w\d$/.test(target)){setMsg('Add the reagents to the tubes, not to the plate.','no');return}
+  }
+  const map={tA:0,tB:1,tC:2,broth:3};
+  if(item in map&&/^w\d$/.test(target)){
+    const w=+target[1];
+    if(!t.lawn){setMsg('Make the lawn first! Without it we cannot see any zones.','no');return}
+    if(map[item]!==w){setMsg(`Wrong well! Well ${w+1} needs ${['tube A','tube B','tube C','the broth'][w]}.`,'no');return}
+    if(item==='tB'&&!(t.B.includes('naoh')&&t.B.includes('cat'))){setMsg('Tube B is not ready yet. Check the protocol.','no');return}
+    if(item==='tC'&&t.C.length<3){setMsg('Tube C is not ready yet. It needs three things.','no');return}
+    if(t.wells[w]){setMsg('This well is already full.','info');return}
+    t.wells[w]=1;setMsg(`Pipetted into well ${w+1}.`,'ok');return}
+  if(item==='plate'&&target==='inc'){if(t.wells.some(x=>!x)){setMsg('Fill all four wells first.','no');return}t.loc='inc';setMsg('Plate is inside. Set the temperature and press Start.','info');return}
+  if(item==='plate'&&target==='bench'){t.loc='bench';return}
+  setMsg(`That doesn't go there. Instructor, read step ${Math.min(tStep(t)+1,5)} again.`,'no');
+}
+function s3(){
+  const S=SAMPLES[st.sample];
+  if(!st.ind){
+    const cards=Object.entries(INDS).map(([k,v])=>{const done=records[st.sample+'-'+k];return `<button class="card" data-i="${k}" ${done?'disabled style="opacity:.55;cursor:default"':''}><h3><i>${v.name}</i></h3><span class="tr">${v.gram}</span><small>${v.note}</small>${done?'<span class="badge ok">already tested</span>':''}</button>`}).join('');
+    return `<div class="stage-head"><h2>3 · Test on a plate</h2><span class="tag">Sample: ${S.name}</span></div>
+    <p class="inst">Choose the <b>indicator</b> bacterium. It will grow as a cloudy “lawn” all over the plate. If your supernatant kills it, you will see a clear circle: an <b>inhibition zone</b>.</p>
+    <div class="cards">${cards}</div>
+    ${say('<p>“Which bacterium has a thicker wall? Which one do you think is easier to kill?”</p>','<p>“I think ___ is easier to kill because its wall is…”</p><p><i>Remember the medieval wall in the article!</i></p>')}`;
+  }
+  const t=st.t,k=tStep(t);
+  const steps=TSTEPS.map((x,i)=>`<li class="${i<k?'did':i===k?'now':''}">${x}</li>`).join('');
+  if(st.incubated){
+    const d=SAMPLES[st.sample].data[st.ind];const right=d.filter((v,i)=>(v>0)===st.pred[i]).length;
+    return `<div class="stage-head"><h2>3 · Test on a plate</h2><span class="tag">${S.name} vs <i>${INDS[st.ind].short}</i></span></div>
+    <div class="two"><div style="display:grid;gap:12px"><div class="msg ok">The next morning… Look at the plate! Are there clear circles?</div>
+      <div class="msg ${right===4?'ok':'no'}">Prediction check: ${right} of 4 wells correct.</div>
+      <button class="btn go" id="next3">Measure the zones</button></div>
+      <div class="dishbox">${dishSVG({anim:true})}</div></div>
+    ${say('<p>“What can you see around the wells? Which wells are clear?”</p>','<p>“There is a clear zone around well ___. Around well ___ there is no zone.”</p>')}`;
+  }
+  const tl=(x,arr)=>arr.length?arr.map(r=>RNAME[r]).join(' + '):(x==='A'?'as it is':'supernatant');
+  const tray=[
+    itm('ind',IC.bottle('var(--sky-s)',st.ind==='lis'?'Lis':'E.c'),INDS[st.ind].short,'indicator culture'),
+    itm('tA',IC.tube('plain','A'),'Tube A','supernatant'),
+    itm('tB',IC.tube('plain','B'),'Tube B',tl('B',t.B)),
+    itm('tC',IC.tube('plain','C'),'Tube C',tl('C',t.C)),
+    itm('broth',IC.bottle('var(--sun-s)','broth'),'Broth','control'),
+    itm('naoh',IC.dropper('var(--sky)','pH'),'NaOH','raises pH'),
+    itm('cat',IC.dropper('var(--mint)','cat'),'Catalase','destroys H₂O₂'),
+    itm('pro',IC.dropper('var(--pink)','pro'),'Protease','cuts proteins')
+  ].join('');
+  const allFilled=t.wells.every(Boolean);
+  const plateStation=t.loc==='bench'?`<div class="station" data-drop="plate" style="min-width:0"><h4>Test plate</h4>
+      <div class="it" data-id="plate" data-drop="plate" style="width:100%;max-width:280px;cursor:grab">${dishSVG({lawn:t.lawn?.25:0,filled:t.wells,drop:true})}<b>Drag the plate to move it</b></div></div>`:
+      `<div class="station"><h4>Test plate</h4><span class="note">The plate is in the incubator.</span></div>`;
+  const preds=allFilled?`<div class="preds"><b>Predict: where will you see a clear zone?</b>${WELLS.map((w,i)=>`<label><input type="checkbox" data-pr="${i}" ${st.pred[i]?'checked':''}> Well ${i+1}: ${w.t}</label>`).join('')}</div>`:'';
+  return `<div class="stage-head"><h2>3 · Test on a plate</h2><span class="tag">${S.name} vs <i>${INDS[st.ind].short}</i></span></div>
+  <p class="inst">Tubes A, B and C all contain your cell-free supernatant. You will treat them differently, so you can find out <b>what</b> kills the bacteria.</p>
+  <div class="benchgrid">
+    <div style="display:grid;gap:12px"><div class="protocol"><h3>Protocol · read aloud</h3><ol>${steps}</ol></div>${preds}</div>
+    <div class="work">
+      <div class="tray" data-drop="bench"><span class="tray-lbl">Bench · drag onto tubes, plate or wells</span>${tray}</div>
+      <div class="stations st3">
+        ${plateStation}
+        <div class="station" data-drop="inc"><h4>Incubator</h4>${IC.inc(t.loc==='inc'?IC.plate('lawn').replace('<svg viewBox="0 0 64 64">','<svg viewBox="0 0 64 64" width="64" height="64">'):'',t.run)}
+          <div class="ctlrow"><button class="ctl" data-c="tm">−</button><span class="temp">${t.temp} °C</span><button class="ctl" data-c="tp">+</button></div>
+          <div class="ctlrow"><button class="ctl go" data-c="start">Start</button><span class="clock" id="clock">${t.run?'0 h':''}</span></div></div>
+      </div>
+      ${msgHTML()}
+    </div>
+  </div>
+  ${say('<p>“Why do we add catalase to tube B? Why does tube C get protease?”</p><p><i>Then: “Why do we need well 4?”</i></p>','<p>“We add ___ because it destroys / neutralises ___.”</p><p><i>“I predict that well ___ will show a clear zone because…”</i></p>')}`;
+}
+function bind3(){
+  document.querySelectorAll('.card[data-i]').forEach(c=>c.onclick=()=>{if(c.disabled)return;st.ind=c.dataset.i;st.incubated=false;st.pred=[false,false,false,false];st.meas=[null,null,null,null];st.sel=0;st.t={lawn:false,B:[],C:[],wells:[0,0,0,0],loc:'bench',temp:20,run:false};st.msg=null;renderStage()});
+  document.querySelectorAll('[data-pr]').forEach(c=>c.onchange=()=>st.pred[+c.dataset.pr]=c.checked);
+  const n=$('#next3');if(n)n.onclick=()=>go(4);
+  const t=st.t;if(!t)return;
+  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=e=>{
+    e.stopPropagation();if(busy)return;const c=b.dataset.c;
+    if(c==='tm'){t.temp=Math.max(0,t.temp-5);renderStage()}
+    if(c==='tp'){t.temp=Math.min(100,t.temp+5);renderStage()}
+    if(c==='start'){
+      if(t.loc!=='inc'){setMsg('The incubator is empty. What should go inside?','no');renderStage();return}
+      const bad=tempCheck(t.temp);if(bad){setMsg(bad.replace('Lactic acid bacteria like','Our indicator bacteria like'),'no');renderStage();return}
+      t.run=true;setMsg(`Incubating overnight at ${t.temp} °C…`,'info');
+      runIncubator(18,()=>{t.run=false;t.loc='bench';st.incubated=true;st.msg=null;renderStage()});
+    }
+  });
+}
+
+/* ---------- Stage 4: measure ---------- */
+function s4(){
+  const wl=WELLS.map((w,i)=>`<button class="well ${i===st.sel?'sel':''} ${st.meas[i]!==null?'rec':''}" data-w="${i}"><span class="num">${i+1}</span><span><b>${w.t}</b><small>${st.meas[i]===null?'not measured':st.meas[i]>0?st.meas[i]+' mm':'no clear zone'}</small></span></button>`).join('');
+  const all=st.meas.every(v=>v!==null);
+  return `<div class="stage-head"><h2>4 · Measure the zones</h2><span class="tag">${SAMPLES[st.sample].name} vs <i>${INDS[st.ind].short}</i></span></div>
+  <p class="inst">Select a well. Move the slider until the pink dashed ring sits exactly on the edge of the clear zone. The plate is 90 mm wide. If there is no clear zone, set it to 0.</p>
+  <div class="two">
+    <div style="display:grid;gap:12px">
+      <div class="wells">${wl}</div>
+      <div class="measure"><span class="tag">Well ${st.sel+1} · zone diameter</span><div class="mm" id="mmv">0 mm</div>
+        <input type="range" id="rng" min="0" max="25" step="1" value="0" aria-label="Zone diameter in millimetres">
+        <div class="row"><button class="btn go" id="rec">Record in notebook</button><span class="toast" id="mt"></span></div></div>
+      ${all?'<button class="btn go" id="next4">Draw a conclusion</button>':''}
+    </div>
+    <div class="dishbox" id="db">${dishSVG({measure:true,val:0})}</div>
+  </div>
+  ${say('<p>“How wide is the zone around well 2?”</p><p><i>“Is it bigger or smaller than well 1?”</i></p>','<p>“The zone around well 2 is ___ millimetres wide.”</p><p><i>“It’s a bit smaller than well 1 / There is no clear zone.”</i></p>')}`;
+}
+function bind4(){
+  const upd=()=>{const v=+$('#rng').value;$('#mmv').textContent=v===0?'0 mm (no zone)':v+' mm';$('#db').innerHTML=dishSVG({measure:true,val:v})};
+  $('#rng').oninput=upd;upd();
+  document.querySelectorAll('button.well').forEach(b=>b.onclick=()=>{st.sel=+b.dataset.w;renderStage()});
+  $('#db').onclick=e=>{const w=e.target.closest('[data-w]');if(w){st.sel=+w.dataset.w;renderStage()}};
+  $('#rec').onclick=()=>{
+    const v=+$('#rng').value,t=SAMPLES[st.sample].data[st.ind][st.sel];
+    const ok=t===0?v<=6:Math.abs(v-t)<=1;
+    if(ok){st.meas[st.sel]=t;const nx=st.meas.findIndex(x=>x===null);if(nx>=0)st.sel=nx;
+      if(st.meas.every(x=>x!==null)){records[st.sample+'-'+st.ind]={vals:[...st.meas],v:null};renderNB()}
+      renderStage();$('#mt').className='toast ok';$('#mt').textContent='Recorded!'}
+    else{$('#mt').className='toast no';$('#mt').textContent=v>t?'Too big. Look at the edge again.':'Too small. Look at the edge again.'}
+  };
+  const n=$('#next4');if(n)n.onclick=()=>go(5);
+}
+
+/* ---------- Stage 5: conclude ---------- */
+function s5(){
+  const S=SAMPLES[st.sample],rec=records[st.sample+'-'+st.ind],d=rec.vals,f=x=>x>0?x+' mm':'no zone';
+  const q1=[['bac','A bacteriocin: a protein killed the bacteria.'],['acid','Only acid or hydrogen peroxide killed them.'],['none','Nothing killed them: there were no zones.']];
+  let h=`<div class="stage-head"><h2>5 · Conclude</h2><span class="tag">${S.name} vs <i>${INDS[st.ind].short}</i></span></div>
+  <p class="inst">Your results: Well 1: ${f(d[0])} · Well 2: ${f(d[1])} · Well 3: ${f(d[2])} · Well 4: ${f(d[3])}</p>
+  <div class="q"><h3>What killed the <i>${INDS[st.ind].short}</i>?</h3>${q1.map(([id,t])=>`<button class="opt" data-a="${id}" ${rec.v?'disabled':''}>${t}</button>`).join('')}<div id="f1"></div></div>`;
+  const other=st.ind==='lis'?'eco':'lis',both=records[st.sample+'-lis']?.v&&records[st.sample+'-eco']?.v;
+  if(both)h+=`<div class="q"><h3>What is the spectrum of this isolate’s bacteriocin?</h3>${[['narrow','Narrow: it kills only some types of bacteria.'],['wide','Wide: it kills many types of bacteria.'],['na','We can’t say: this isolate makes no bacteriocin.']].map(([id,t])=>`<button class="opt" data-b="${id}">${t}</button>`).join('')}<div id="f2"></div></div>`;
+  h+=`<div class="row">${!records[st.sample+'-'+other]?`<button class="btn go" id="other">Test on <i>${INDS[other].short}</i></button>`:''}<button class="btn" id="newS">Hunt in another sample</button></div>`;
+  if(Object.keys(records).length===8&&Object.values(records).every(r=>r.v))h+=`<div class="fb ok"><b>Mission complete!</b> Hold a mini lab conference: Which sample is the best bacteriocin hunter? Would you use it to protect food? Why or why not?</div>`;
+  return h+say(`<p>“What did you find? How do you know?”</p><p><i>“Why is well 3 so important?”</i></p>`,`<p>“We tested ${S.name.toLowerCase()} against ${INDS[st.ind].short}. Well 2 showed ${f(d[1])}, so… Well 3 showed ${f(d[2])}, which means…”</p>`);
+}
+function bind5(){
+  const rec=records[st.sample+'-'+st.ind],v=verdict(st.sample,st.ind);
+  const EX={bac:'Well 2 still had a clear zone after acid and hydrogen peroxide were removed. Well 3 had no zone after protease cut up the proteins. So the killer is a protein: a bacteriocin!',
+    acid:'Well 1 had a zone, but well 2 had none. When acid and hydrogen peroxide were removed, the killing stopped. These are wide-spectrum, non-specific antimicrobials, not a bacteriocin.',
+    none:'No well had a clear zone. This isolate does not kill the indicator bacteria.'};
+  if(rec.v){document.querySelectorAll('[data-a]').forEach(b=>{if(b.dataset.a===v)b.classList.add('right')});$('#f1').innerHTML=`<div class="fb ok">${EX[v]}</div>`}
+  document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.a===v){rec.v=v;renderNB();confetti();renderStage()}
+    else{b.classList.add('wrong');$('#f1').innerHTML='<div class="fb no">Not quite. Compare well 1 with well 2, then well 2 with well 3.</div>'}
+  });
+  const vl=verdict(st.sample,'lis'),ve=verdict(st.sample,'eco');
+  const sv=vl==='bac'||ve==='bac'?(vl==='bac'&&ve==='bac'?'wide':'narrow'):'na';
+  const EX2={narrow:'It kills Gram-positive Listeria but not Gram-negative E. coli, whose outer membrane protects it. Tailor-made, like the article says!',wide:'It kills both kinds of bacteria.',na:'Only acid or hydrogen peroxide worked, so there is no bacteriocin to describe.'};
+  document.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('[data-b]').forEach(x=>x.classList.remove('wrong'));
+    if(b.dataset.b===sv){document.querySelectorAll('[data-b]').forEach(x=>{x.disabled=true;if(x.dataset.b===sv)x.classList.add('right')});$('#f2').innerHTML=`<div class="fb ok">${EX2[sv]}</div>`}
+    else{b.classList.add('wrong');$('#f2').innerHTML='<div class="fb no">Check both rows for this sample in your notebook.</div>'}
+  });
+  const o=$('#other');if(o)o.onclick=()=>{st.ind=null;go(3)};
+  $('#newS').onclick=()=>{st.sample=null;st.ind=null;go(1)};
+}
+
+function renderNB(){
+  const ks=Object.keys(records);$('#nbcount').textContent=ks.length+' / 8 tests';if(!ks.length)return;
+  $('#nb').innerHTML=ks.map(k=>{const [s,i]=k.split('-'),r=records[k];return `<tr><td>${SAMPLES[s].name}</td><td><i>${INDS[i].short}</i></td>${r.vals.map(x=>`<td class="n">${x>0?x:'–'}</td>`).join('')}<td>${r.v?`<span class="verdict v-${r.v}">${VTXT[r.v]}</span>`:'<span class="tag">conclude first</span>'}</td></tr>`}).join('');
+}
+function renderStage(){
+  stepper();const s=$('#stage');s.style.setProperty('--c',`var(--${STAGECOL[st.stage]})`);s.style.setProperty('--cs',`var(--${STAGECOL[st.stage]}-s)`);
+  s.innerHTML=[null,s1,s2,s3,s4,s5][st.stage]();
+  [null,bind1,bind2,bind3,bind4,bind5][st.stage]();
+  markHeldSilent();
+}
+function markHeldSilent(){document.querySelectorAll('.it[data-id]').forEach(x=>x.classList.toggle('sel',x.dataset.id===held))}
+makeDots();renderRoles();renderStage();
+</script>
+
+</body></html>
